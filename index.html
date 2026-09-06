@@ -6,95 +6,99 @@
   <title>LinkUp</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background: #0A0E13; color: #fff; height: 100vh; }
+    body { background: #0A0E13; color: #fff; height: 100vh; padding-bottom: 70px; }
     .hidden { display: none !important; }
     
     /* HEADER */
-    .header { background: #121A22; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .header { background: #121A22; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
     .header h1 { font-size: 22px; color: #00BFA6; }
-    .header .icons { display: flex; gap: 20px; font-size: 22px; }
     
-    /* MY ID CARD */
-    .myIdCard { margin: 15px; background: #121A22; border-radius: 12px; padding: 15px; display: flex; align-items: center; border-left: 3px solid #00BFA6; }
-    .avatar { width: 50px; height: 50px; background: #00BFA6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; margin-right: 12px; }
-    .idInfo { flex: 1; }
-    .idInfo .label { font-size: 12px; color: #8A9BA8; }
-    .idInfo .id { font-size: 18px; font-weight: bold; }
+    /* SETTINGS LIST */
+    .setting-item { display: flex; align-items: center; padding: 14px 20px; background: #121A22; border-bottom: 1px solid #1E2A36; cursor: pointer; }
+    .setting-item:active { background: #1E2A36; }
+    .icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 18px; }
+    .setting-text { flex: 1; }
+    .setting-text .title { font-size: 16px; }
+    .setting-text .sub { font-size: 12px; color: #8A9BA8; }
     
-    /* CONNECT CARD */
-    .connectCard { margin: 15px; background: #121A22; border-radius: 12px; padding: 20px; }
-    .connectCard h3 { color: #00BFA6; text-align: center; margin-bottom: 15px; }
-    .connectCard p { color: #8A9BA8; font-size: 14px; line-height: 1.5; margin-bottom: 15px; }
-    .idBox { background: #0A0E13; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .idBox .num { font-size: 16px; letter-spacing: 1px; }
-    .copyBtn { background: #00BFA6; border: none; padding: 8px 12px; border-radius: 6px; color: #000; font-weight: bold; }
-    .addFriend { width: 100%; padding: 14px; background: #00BFA6; border: none; border-radius: 8px; color: #000; font-weight: bold; font-size: 16px; }
+    /* PROFILE CARD AT TOP OF SETTINGS */
+    .profileCard { background: #121A22; padding: 20px; display: flex; align-items: center; border-bottom: 1px solid #1E2A36; }
+    .profileCard .avatar { width: 60px; height: 60px; background: #00BFA6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #000; margin-right: 15px; }
+    .profileCard .id { font-size: 18px; font-weight: bold; }
     
     /* BOTTOM NAV */
-    .bottomNav { position: fixed; bottom: 0; width: 100%; background: #121A22; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #1E2A36; }
-    .navItem { text-align: center; color: #8A9BA8; font-size: 12px; }
+    .bottomNav { position: fixed; bottom: 0; width: 100%; background: #121A22; display: flex; justify-content: space-around; padding: 8px 0; border-top: 1px solid #1E2A36; }
+    .navItem { text-align: center; color: #8A9BA8; font-size: 11px; cursor: pointer; padding: 5px 0; width: 25%; }
     .navItem.active { color: #00BFA6; }
     .navItem .icon { font-size: 24px; margin-bottom: 4px; }
     
-    /* FAB BUTTON */
-    .fab { position: fixed; bottom: 80px; right: 20px; width: 56px; height: 56px; background: #00BFA6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #000; border: none; }
+    /* COLORS FOR ICONS */
+    .c1{background:#8B5CF6}.c2{background:#3B82F6}.c3{background:#00BFA6}.c4{background:#10B981}
+    .c5{background:#EF4444}.c6{background:#F59E0B}.c7{background:#6366F1}.c8{background:#EC4899}
   </style>
 </head>
 <body>
-  <!-- HEADER -->
-  <div class="header">
-    <h1>Chats</h1>
-    <div class="icons">🔍 ⋮</div>
+  <!-- CHATS SCREEN -->
+  <div id="chatsScreen">
+    <div class="header"><h1>Chats</h1><div>🔍 ⋮</div></div>
+    <div style="padding:20px; color:#8A9BA8; text-align:center;">No chats yet. Tap + to start</div>
   </div>
 
-  <!-- MY ID AT TOP -->
-  <div class="myIdCard">
-    <div class="avatar" id="avatar">L</div>
-    <div class="idInfo">
-      <div class="label" id="myIdLabel">LNK-813878 (You)</div>
-      <div class="label">Tap to share your ID</div>
+  <!-- SETTINGS SCREEN -->
+  <div id="settingsScreen" class="hidden">
+    <div class="header"><h1>Settings</h1><div>🔍 ⋮</div></div>
+    
+    <!-- PROFILE TOP -->
+    <div class="profileCard">
+      <div class="avatar">L</div>
+      <div>
+        <div class="id" id="myId">LNK-813878</div>
+        <div style="color:#8A9BA8; font-size:14px;">Your LinkUp ID</div>
+      </div>
+      <div style="margin-left:auto; font-size:24px;">📤</div>
     </div>
-  </div>
 
-  <!-- CONNECT CARD -->
-  <div class="connectCard">
-    <h3>Start New Chat</h3>
-    <p>Share your <span style="color:#00BFA6">LinkUp ID</span> with friends so they can contact you privately.</p>
-    <div class="idBox">
-      <div class="num" id="myIdDisplay">LNK-813878</div>
-      <button class="copyBtn" onclick="copyId()">Copy</button>
-    </div>
-    <p>Or connect with someone using their ID below</p>
-    <input type="text" id="friendId" placeholder="Enter Friend's ID" style="width:100%; padding:12px; background:#0A0E13; border:1px solid #1E2A36; border-radius:8px; color:#fff; margin-bottom:10px;">
-    <button class="addFriend" onclick="startChat()">Message</button>
+    <!-- SETTINGS LIST -->
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c1">👤</div><div class="setting-text"><div class="title">Invite Friends</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c2">✏️</div><div class="setting-text"><div class="title">Personal Messages</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c3">💬</div><div class="setting-text"><div class="title">Chat Settings</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c4">🔒</div><div class="setting-text"><div class="title">Privacy & Security</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c5">🔔</div><div class="setting-text"><div class="title">Notifications</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c6">💾</div><div class="setting-text"><div class="title">Data & Storage</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c7">🔤</div><div class="setting-text"><div class="title">Text Size</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c2">🌍</div><div class="setting-text"><div class="title">App Language</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c3">❓</div><div class="setting-text"><div class="title">Help & FAQ</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c1">⭐</div><div class="setting-text"><div class="title">Rate LinkUp</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c4">🛡️</div><div class="setting-text"><div class="title">Privacy Policy</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c8">📄</div><div class="setting-text"><div class="title">Terms of Service</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c2">ℹ️</div><div class="setting-text"><div class="title">How to use LinkUp</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c1">👑</div><div class="setting-text"><div class="title">LinkUp Pro Features</div></div></div>
+    <div class="setting-item" onclick="alert('Coming Soon')"><div class="icon c5">🎨</div><div class="setting-text"><div class="title">Appearance</div></div></div>
+    
+    <div style="text-align:center; color:#8A9BA8; padding:20px; font-size:12px;">Version 1.0.0 (1001)</div>
   </div>
-
-  <!-- FAB -->
-  <button class="fab" onclick="alert('New Chat')">+</button>
 
   <!-- BOTTOM NAV -->
   <div class="bottomNav">
-    <div class="navItem active"><div class="icon">💬</div>Chats</div>
-    <div class="navItem"><div class="icon">📞</div>Calls</div>
-    <div class="navItem"><div class="icon">👥</div>Contacts</div>
-    <div class="navItem"><div class="icon">⚙️</div>Settings</div>
+    <div class="navItem active" onclick="showScreen('chatsScreen')"><div class="icon">💬</div>Chats</div>
+    <div class="navItem" onclick="alert('Calls coming')"><div class="icon">📞</div>Calls</div>
+    <div class="navItem" onclick="alert('Contacts coming')"><div class="icon">👥</div>Contacts</div>
+    <div class="navItem" onclick="showScreen('settingsScreen')"><div class="icon">⚙️</div>Settings</div>
   </div>
 
   <script>
-    // This will connect to your Firebase later
+    function showScreen(id) {
+      document.getElementById('chatsScreen').classList.add('hidden');
+      document.getElementById('settingsScreen').classList.add('hidden');
+      document.getElementById(id).classList.remove('hidden');
+      
+      document.querySelectorAll('.navItem').forEach(e=>e.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
+    
+    // Set your ID here
     let myId = "LNK-" + Math.floor(100000 + Math.random() * 900000);
-    document.getElementById('myIdDisplay').innerText = myId;
-    document.getElementById('myIdLabel').innerText = myId + " (You)";
-    document.getElementById('avatar').innerText = "L";
-
-    function copyId() {
-      navigator.clipboard.writeText(myId);
-      alert("ID Copied: " + myId);
-    }
-    function startChat() {
-      const fid = document.getElementById('friendId').value;
-      if(fid) alert("Starting chat with " + fid);
-    }
+    document.getElementById('myId').innerText = myId;
   </script>
 </body>
 </html>
