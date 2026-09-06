@@ -83,7 +83,7 @@ audio { width: 200px; max-width: 100%; }
         <div class="messages" id="messages"></div>
         <div class="typing" id="typingIndicator"></div>
         <div class="input-area">
-            <input type="text" id="msgInput" placeholder="Message...">
+            <input type="text" id="msgInput" placeholder="Message..." onkeypress="if(event.key==='Enter')sendMsg()">
             <button class="mic-btn" id="micBtn">🎤</button>
             <button class="btn send" onclick="sendMsg()">Send</button>
         </div>
@@ -91,15 +91,15 @@ audio { width: 200px; max-width: 100%; }
 </div>
 
 <script>
-/* ====== FIREBASE CONFIG ====== */
+/* ====== YOUR FIREBASE CONFIG ====== */
 const firebaseConfig = {
-    apiKey: "PASTE_YOUR_API_KEY",
-    authDomain: "linkup-chat-3fdd5.firebaseapp.com",
-    databaseURL: "https://linkup-chat-3fdd5-default-rtdb.firebaseio.com",
-    projectId: "linkup-chat-3fdd5",
-    storageBucket: "linkup-chat-3fdd5.appspot.com",
-    messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
-    appId: "PASTE_YOUR_APP_ID"
+  apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
+  authDomain: "linkup-chat-3fdd5.firebaseapp.com",
+  databaseURL: "https://linkup-chat-3fdd5-default-rtdb.firebaseio.com",
+  projectId: "linkup-chat-3fdd5",
+  storageBucket: "linkup-chat-3fdd5.firebasestorage.app",
+  messagingSenderId: "177573067619",
+  appId: "1:177573067619:web:40e64ae330bb86200e7156"
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -109,20 +109,23 @@ const storage = firebase.storage();
 let myName = "", currentFriend = "", currentChat = "";
 let recorder, isRecording = false;
 
-/* ====== INIT ====== */
 async function initializeApp() {
-    await auth.signInAnonymously();
-    myName = localStorage.getItem("linkupId") || "LinkUp_" + Math.floor(1000 + Math.random() * 9000);
-    localStorage.setItem("linkupId", myName);
-    await db.ref("users/" + myName).update({id: myName, uid: auth.currentUser.uid, online: false});
-    document.getElementById("myId").textContent = myName;
-    document.getElementById("myHeaderId").textContent = myName;
-    document.getElementById("loading").style.display = "none";
-    if(localStorage.getItem("linkupStarted") === "true") startApp();
+    try {
+        await auth.signInAnonymously();
+        myName = localStorage.getItem("linkupId") || "LinkUp_" + Math.floor(1000 + Math.random() * 9000);
+        localStorage.setItem("linkupId", myName);
+        await db.ref("users/" + myName).update({id: myName, uid: auth.currentUser.uid, online: false});
+        document.getElementById("myId").textContent = myName;
+        document.getElementById("myHeaderId").textContent = myName;
+        document.getElementById("loading").style.display = "none";
+        if(localStorage.getItem("linkupStarted") === "true") startApp();
+    } catch (error) {
+        document.getElementById("loading").innerHTML = "<h2>Firebase Error</h2><p>Check Rules</p>";
+        alert("Firebase connection failed: " + error.message);
+    }
 }
 initializeApp();
 
-/* ====== PRESENCE ====== */
 function setupPresence() {
     const userRef = db.ref("users/" + myName);
     db.ref(".info/connected").on("value", snap => {
@@ -133,7 +136,6 @@ function setupPresence() {
     });
 }
 
-/* ====== START APP ====== */
 function startApp() {
     localStorage.setItem("linkupStarted", "true");
     setupPresence();
@@ -142,16 +144,13 @@ function startApp() {
     loadChatList();
 }
 
-/* ====== COPY ID ====== */
 function copyId() {
     navigator.clipboard.writeText(myName);
     alert("ID Copied: " + myName);
 }
 
-/* ====== CHAT ID ====== */
 function createChatId(u1, u2) { return [u1, u2].sort().join("__"); }
 
-/* ====== ADD FRIEND ====== */
 async function newChat() {
     const friend = document.getElementById("newChatId").value.trim();
     if(!friend) return alert("Enter friend ID");
@@ -167,7 +166,6 @@ async function newChat() {
     openChat(friend);
 }
 
-/* ====== LOAD CHAT LIST ====== */
 function loadChatList() {
     db.ref("userChats/" + myName).on("value", snap => {
         const chats = document.getElementById("chats");
@@ -186,13 +184,13 @@ function loadChatList() {
             div.onclick = () => openChat(data.friend);
             chats.appendChild(div);
             db.ref("users/" + data.friend + "/online").on("value", s => {
-                document.getElementById("dot_" + data.friend).classList.toggle("online", s.val() === true);
+                const dot = document.getElementById("dot_" + data.friend);
+                if(dot) dot.classList.toggle("online", s.val() === true);
             });
         });
     });
 }
 
-/* ====== OPEN CHAT ====== */
 function openChat(friend) {
     currentFriend = friend;
     currentChat = createChatId(myName, friend);
@@ -205,7 +203,6 @@ function openChat(friend) {
     listenToMessages();
 }
 
-/* ====== SEND MESSAGE ====== */
 function sendMsg() {
     const text = document.getElementById("msgInput").value.trim();
     if(!text) return;
@@ -216,7 +213,6 @@ function sendMsg() {
     document.getElementById("msgInput").value = "";
 }
 
-/* ====== LISTEN MESSAGES ====== */
 function listenToMessages() {
     db.ref("messages/" + currentChat).off();
     db.ref("messages/" + currentChat).on("value", snap => {
@@ -234,7 +230,6 @@ function listenToMessages() {
     });
 }
 
-/* ====== VOICE NOTE ====== */
 const micBtn = document.getElementById("micBtn");
 micBtn.onmousedown = micBtn.ontouchstart = startRecord;
 micBtn.onmouseup = micBtn.ontouchend = stopRecord;
@@ -254,6 +249,8 @@ function startRecord() {
                 snap.ref.getDownloadURL().then(url => {
                     const msg = {from: myName, type: "voice", url: url, time: Date.now()};
                     db.ref("messages/" + currentChat).push(msg);
+                    db.ref("userChats/" + myName + "/" + currentChat).update({lastMessage: "🎤 Voice note", updatedAt: Date.now()});
+                    db.ref("userChats/" + currentFriend + "/" + currentChat).update({lastMessage: "🎤 Voice note", updatedAt: Date.now()});
                 });
             });
         };
@@ -268,7 +265,6 @@ function stopRecord() {
     if(recorder) recorder.stop();
 }
 
-/* ====== BACK ====== */
 function backToList() {
     db.ref("messages/" + currentChat).off();
     document.getElementById("chatScreen").style.display = "none";
