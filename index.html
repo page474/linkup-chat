@@ -6,33 +6,31 @@
   <title>LinkUp</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#00BFA6">
-  <meta name="apple-mobile-web-app-capable" content="yes">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body { background: #0A0E13; color: #fff; height: 100vh; overflow: hidden; }
     .hidden { display: none !important; }
     
-    /* SPLASH */
     #splash { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #00BFA6 0%, #00897B 100%); }
     #splash img { width: 100px; height: 100px; background: #fff; border-radius: 24px; margin-bottom: 20px; }
     #splash h1 { font-size: 32px; margin-bottom: 8px; }
     .loader { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-top: 20px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
-    /* LOGIN */
-    #login { padding: 40px 20px; max-width: 400px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; justify-content: center; }
-    #login h2 { text-align: center; margin-bottom: 20px; color: #00BFA6; font-size: 28px; }
-    #login input { width: 100%; padding: 14px; margin: 10px 0; background: #1A1F25; border: 1px solid #2A3038; border-radius: 8px; color: #fff; font-size: 16px; }
-    #login button { width: 100%; padding: 14px; background: #00BFA6; border: none; border-radius: 8px; color: #fff; font-weight: bold; font-size: 16px; margin-top: 10px; cursor: pointer; }
+    #welcome { padding: 40px 20px; max-width: 400px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+    #welcome h2 { color: #00BFA6; font-size: 28px; margin-bottom: 10px; }
+    #welcome p { color: #aaa; margin-bottom: 30px; }
+    #myId { background: #1A1F25; padding: 20px; border-radius: 12px; font-size: 24px; font-weight: bold; color: #00BFA6; letter-spacing: 2px; margin-bottom: 20px; }
+    #welcome button { width: 100%; padding: 16px; background: #00BFA6; border: none; border-radius: 8px; color: #000; font-weight: bold; font-size: 16px; cursor: pointer; }
     
-    /* CHAT */
     #chat { display: flex; flex-direction: column; height: 100vh; }
     #chatHeader { padding: 15px; background: #1A1F25; border-bottom: 1px solid #2A3038; display: flex; justify-content: space-between; align-items: center; }
-    #chatHeader h3 { color: #00BFA6; }
+    #chatHeader h3 { color: #00BFA6; font-size: 14px; }
     #chatHeader button { background: #ff4444; border: none; padding: 8px 14px; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; }
     #messages { flex: 1; overflow-y: auto; padding: 15px; background: #0A0E13; }
     .msg { background: #1A1F25; padding: 10px 14px; border-radius: 12px; margin-bottom: 10px; max-width: 75%; word-wrap: break-word; }
     .msg.me { background: #00BFA6; margin-left: auto; color: #000; }
+    .msg .id { font-size: 11px; opacity: 0.7; margin-bottom: 4px; }
     #chatInput { display: flex; padding: 10px; background: #1A1F25; border-top: 1px solid #2A3038; }
     #chatInput input { flex: 1; padding: 12px 16px; background: #0A0E13; border: 1px solid #2A3038; border-radius: 20px; color: #fff; font-size: 15px; outline: none; }
     #chatInput button { margin-left: 10px; padding: 12px 20px; background: #00BFA6; border: none; border-radius: 20px; color: #000; font-weight: bold; cursor: pointer; }
@@ -47,20 +45,19 @@
     <div class="loader"></div>
   </div>
 
-  <!-- LOGIN SCREEN -->
-  <div id="login" class="hidden">
+  <!-- WELCOME SCREEN LIKE ZANGI -->
+  <div id="welcome" class="hidden">
     <h2>Welcome to LinkUp</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-    <button onclick="signup()" style="background: #2A3038;">Create Account</button>
+    <p>Your LinkUp ID</p>
+    <div id="myId">LNK-000</div>
+    <button onclick="enterChat()">Start Chatting</button>
   </div>
 
   <!-- CHAT SCREEN -->
   <div id="chat" class="hidden">
     <div id="chatHeader">
-      <h3>Global Chat</h3>
-      <button onclick="logout()">Logout</button>
+      <h3 id="headerId">ID: LNK-000</h3>
+      <button onclick="logout()">Reset</button>
     </div>
     <div id="messages"></div>
     <div id="chatInput">
@@ -70,13 +67,11 @@
   </div>
 
   <script type="module">
-    // IMPORT FIREBASE
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, push, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, push, onValue, serverTimestamp, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 
-    // YOUR FIREBASE CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
       authDomain: "linkup-chat-3fdd5.firebaseapp.com",
@@ -88,60 +83,69 @@
       measurementId: "G-Q73V61VYEQ"
     };
 
-    // INIT FIREBASE
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
     const analytics = getAnalytics(app);
 
     let currentUser = null;
+    let myLinkUpId = "";
 
-    // CHECK LOGIN STATE
+    // GENERATE RANDOM ID LIKE ZANGI: LNK-847291
+    function generateId() {
+      const num = Math.floor(100000 + Math.random() * 900000);
+      return `LNK-${num}`;
+    }
+
+    // AUTO LOGIN ANONYMOUSLY
+    signInAnonymously(auth).catch(e => alert(e.message));
+
     onAuthStateChanged(auth, (user) => {
       setTimeout(() => {
         document.getElementById('splash').classList.add('hidden');
         if (user) {
           currentUser = user;
-          document.getElementById('chat').classList.remove('hidden');
-          loadMessages();
-        } else {
-          document.getElementById('login').classList.remove('hidden');
+          
+          // Check if user already get ID, if not generate new one
+          const userRef = ref(db, 'users/' + user.uid);
+          onValue(userRef, (snap) => {
+            if(snap.exists()) {
+              myLinkUpId = snap.val().linkupId;
+            } else {
+              myLinkUpId = generateId();
+              set(userRef, { linkupId: myLinkUpId, createdAt: serverTimestamp() });
+            }
+            document.getElementById('myId').innerText = myLinkUpId;
+            document.getElementById('headerId').innerText = `ID: ${myLinkUpId}`;
+            document.getElementById('welcome').classList.remove('hidden');
+          }, { onlyOnce: true });
+          
         }
       }, 1500);
     });
 
-    // LOGIN
-    window.login = () => {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      if(!email || !password) return alert("Fill all fields");
-      signInWithEmailAndPassword(auth, email, password).catch(e => alert(e.message));
+    window.enterChat = () => {
+      document.getElementById('welcome').classList.add('hidden');
+      document.getElementById('chat').classList.remove('hidden');
+      loadMessages();
     }
 
-    // SIGNUP
-    window.signup = () => {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      if(!email || !password) return alert("Fill all fields");
-      createUserWithEmailAndPassword(auth, email, password).catch(e => alert(e.message));
+    window.logout = () => {
+      if(confirm("This go reset your ID. Continue?")) signOut(auth).then(() => window.location.reload());
     }
 
-    // LOGOUT
-    window.logout = () => signOut(auth);
-
-    // SEND MESSAGE
     window.sendMsg = async () => {
       const input = document.getElementById('msgInput');
       if(input.value.trim() === '') return;
       push(ref(db, "messages"), {
         text: input.value,
         uid: currentUser.uid,
+        linkupId: myLinkUpId,
         timestamp: serverTimestamp()
       });
       input.value = '';
     }
 
-    // LOAD MESSAGES REAL-TIME
     function loadMessages() {
       const messagesRef = ref(db, "messages");
       onValue(messagesRef, (snapshot) => {
@@ -150,7 +154,11 @@
         snapshot.forEach(child => {
           const msg = child.val();
           const isMe = msg.uid === currentUser.uid;
-          messagesDiv.innerHTML += `<div class="msg ${isMe ? 'me' : ''}">${msg.text}</div>`;
+          messagesDiv.innerHTML += `
+            <div class="msg ${isMe ? 'me' : ''}">
+              <div class="id">${msg.linkupId}</div>
+              ${msg.text}
+            </div>`;
         });
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });
