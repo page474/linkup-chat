@@ -19,7 +19,7 @@ body { background: #111b21; color: white; font-family: Arial; }
 .chat-area { background-color: #0b141a; background-image: radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px); background-size: 20px 20px; }
 .empty-state { text-align: center; color: #8696a0; margin-top: 40%; }
 .msg-wrap { position: relative; }
-.msg-menu { position: absolute; right: 10px; top: -35px; background: #233138; padding: 8px 12px; border-radius: 8px; display: none; z-index: 10; }
+.msg-menu { position: absolute; right: 10px; top: -35px; background: #233138; padding: 8px 12px; border-radius: 8px; display: none; z-index: 10; cursor: pointer; }
 .deleted { color: #8696a0; font-style: italic; }
 </style>
 </head>
@@ -105,7 +105,7 @@ body { background: #111b21; color: white; font-family: Arial; }
   </div>
 </section>
 
-<section id="statusScreen" class="hidden h-full flex flex-col">
+<section id="statusScreen" class="hidden h-full flex-col">
   <header class="topbar p-4 flex items-center gap-3">
     <button onclick="backHome()"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
     <h2 class="text-xl font-bold">Status</h2>
@@ -124,7 +124,7 @@ body { background: #111b21; color: white; font-family: Arial; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, push, onChildAdded, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, push, onChildAdded, onChildChanged, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -142,7 +142,6 @@ let myId = "";
 let currentChat = "";
 let currentFriendId = "";
 let mediaRecorder, audioChunks = [];
-let activeMsgId = null;
 
 lucide.createIcons();
 
@@ -236,62 +235,63 @@ function openChat(fid, name){
   set(ref(db, "users/" + myId + "/chats/" + fid), {id: fid, name: name || fid});
   set(ref(db, "users/" + fid + "/chats/" + myId), {id: myId, name: document.getElementById("profileName").value});
   
+  // LISTEN FOR NEW MESSAGES
   onChildAdded(ref(db, 'chats/'+currentChat), s => {
     if(document.getElementById('msgs').querySelector('.empty-state')){
       document.getElementById('msgs').innerHTML = "";
     }
-    const m = s.val();
-    const msgId = s.key;
-    
-    const d = document.createElement('div');
-    d.className = m.sender === myId? 'text-right msg-wrap' : 'text-left msg-wrap';
-    d.id = 'msg-' + msgId;
-    
-    let content = '';
-    if(m.deleted){
-      content = `<div class="inline-block deleted px-3 py-2 rounded-lg">This message was deleted</div>`;
-    } else if(m.type === 'image') {
-      content = `<img src="${m.url}" class="chat-img"/>`;
-    } else if(m.type === 'audio') {
-      content = `<audio controls src="${m.url}" class="max-w-xs"></audio>`;
-    } else {
-      content = `<div class="inline-block ${m.sender === myId? 'me' : 'them'} px-3 py-2 rounded-lg max-w-xs">${m.text}</div>`;
-    }
-    
-    // Add delete menu only for your own messages
-    if(m.sender === myId &&!m.deleted){
-      content += `<div class="msg-menu" id="menu-${msgId}">
-        <button onclick="deleteForMe('${msgId}')">Delete for me</button>
-      </div>`;
-    }
-    
-    d.innerHTML = content;
-    d.oncontextmenu = (e) => { e.preventDefault(); showMenu(msgId); }
-    d.onclick = () => hideMenu();
-    
-    document.getElementById('msgs').appendChild(d);
-    document.getElementById('msgs').scrollTop = 99999;
-    
-    if(!m.deleted) {
-      set(ref(db, 'users/' + myId + '/chats/' + fid + '/lastMsg'), m.type === 'image'? '📷 Photo' : m.type === 'audio'? '🎤 Voice' : m.text);
-    }
+    renderMessage(s.key, s.val());
   });
+
+  // LISTEN FOR UPDATED MESSAGES - FOR DELETE
+  onChildChanged(ref(db, 'chats/'+currentChat), s => {
+    const msgDiv = document.getElementById('msg-' + s.key);
+    if(msgDiv) msgDiv.remove();
+    renderMessage(s.key, s.val());
+  });
+}
+
+function renderMessage(msgId, m){
+  const d = document.createElement('div');
+  d.className = m.sender === myId? 'text-right msg-wrap' : 'text-left msg-wrap';
+  d.id = 'msg-' + msgId;
+  
+  let content = '';
+  if(m.deleted){
+    content = `<div class="inline-block deleted px-3 py-2 rounded-lg">🗑️ This message was deleted</div>`;
+  } else if(m.type === 'image') {
+    content = `<img src="${m.url}" class="chat-img"/>`;
+  } else if(m.type === 'audio') {
+    content = `<audio controls src="${m.url}" class="max-w-xs"></audio>`;
+  } else {
+    content = `<div class="inline-block ${m.sender === myId? 'me' : 'them'} px-3 py-2 rounded-lg max-w-xs">${m.text}</div>`;
+  }
+  
+  if(m.sender === myId &&!m.deleted){
+    content += `<div class="msg-menu" id="menu-${msgId}" onclick="deleteForMe('${msgId}')">Delete</div>`;
+  }
+  
+  d.innerHTML = content;
+  d.oncontextmenu = (e) => { e.preventDefault(); showMenu(msgId); }
+  d.onclick = () => hideMenu();
+  
+  document.getElementById('msgs').appendChild(d);
+  document.getElementById('msgs').scrollTop = 99999;
 }
 
 function showMenu(msgId){
   hideMenu();
   const menu = document.getElementById('menu-' + msgId);
   if(menu) menu.style.display = 'block';
-  activeMsgId = msgId;
 }
 
 function hideMenu(){
   document.querySelectorAll('.msg-menu').forEach(m => m.style.display = 'none');
-  activeMsgId = null;
 }
 
 window.deleteForMe = async (msgId) => {
-  await remove(ref(db, 'chats/'+currentChat+'/'+msgId));
+  // INSTEAD OF REMOVE, WE UPDATE TO DELETED
+  await update(ref(db, 'chats/'+currentChat+'/'+msgId), {deleted: true, text: '', url: ''});
   hideMenu();
 }
 
