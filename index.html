@@ -11,25 +11,18 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 .header h1{flex:1;color:#00BFA6;font-size:20px}
 .back{font-size:24px;cursor:pointer;margin-right:15px}
 .screen{flex:1;overflow-y:auto;display:flex;flex-direction:column}
-
-/* AUTH */
 .authBox{margin:auto;text-align:center;padding:40px 20px;width:100%;max-width:400px}
 .authBox input{width:100%;padding:14px;background:#121A22;border:1px solid #263442;border-radius:8px;color:#fff;margin-bottom:15px}
 .authBtn{width:100%;padding:14px;background:#00BFA6;border:none;border-radius:8px;color:#000;font-weight:bold}
-
-/* CHAT LIST */
 #chatList{flex:1}
-.chatItem{display:flex;align-items:center;padding:15px;border-bottom:1px solid #1E2A36;cursor:pointer;position:relative}
-.chatItem:active{background:#121A22}
-.avatar{width:50px;height:50px;border-radius:50%;background:#00BFA6;color:#000;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:12px;position:relative;font-size:18px}
+.chatItem{display:flex;align-items:center;padding:15px;border-bottom:1px solid #1E2A36;cursor:pointer}
+.avatar{width:50px;height:50px;border-radius:50%;background:#00BFA6;color:#000;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:12px;font-size:18px}
 .chatInfo{flex:1;min-width:0}
 .chatName{font-weight:bold;margin-bottom:4px}
 .lastMsg{color:#8A9BA8;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chatOptions{font-size:20px;padding:10px}
 .fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#00BFA6;border:none;font-size:28px;color:#000}
 .empty{text-align:center;color:#71808d;padding:60px 20px}
-
-/* CHAT */
 #messages{flex:1;padding:15px;overflow-y:auto}
 .msg{background:#1E2A36;padding:10px 14px;border-radius:12px;margin-bottom:8px;max-width:75%;width:fit-content}
 .msg.me{background:#00BFA6;color:#000;margin-left:auto}
@@ -39,16 +32,11 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 .inputArea{display:flex;padding:10px;background:#121A22;border-top:1px solid #1E2A36;gap:8px}
 .inputArea input{flex:1;background:#0A0E13;border:1px solid #263442;border-radius:25px;padding:12px 16px;color:#fff;outline:none}
 .inputArea button{width:44px;height:44px;border-radius:50%;background:#00BFA6;border:none;color:#000;font-size:20px}
-.inputArea.disabled input{background:#1a1f25;cursor:not-allowed}
-
-/* POPUP & MENU */
+.inputArea.disabled{opacity:0.5;pointer-events:none}
 .popup{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}
 .popupBox{background:#121A22;padding:20px;border-radius:12px;width:90%;max-width:400px}
 .popupBtn{width:100%;padding:14px;background:#00BFA6;border:none;border-radius:8px;color:#000;font-weight:bold;margin-top:10px}
 .danger{background:#d32f2f!important;color:#fff!important}
-.menu{position:absolute;right:10px;top:50px;background:#1E2A36;border-radius:8px;z-index:50;box-shadow:0 4px 15px #000}
-.menuItem{padding:12px 20px;cursor:pointer}
-.menuItem:hover{background:#263442}
 </style>
 </head>
 <body>
@@ -152,8 +140,8 @@ window.startChat = () => {
   hideNewChat();
   checkBlocked();
   loadMessages();
-  update(ref(db, 'chatList/' + myId + '/' + fid), { lastTime: Date.now() });
-  update(ref(db, 'chatList/' + fid + '/' + myId), { lastTime: Date.now() });
+  update(ref(db, 'chatList/' + myId + '/' + fid), { lastTime: Date.now(), lastMsg: "Chat started" });
+  update(ref(db, 'chatList/' + fid + '/' + myId), { lastTime: Date.now(), lastMsg: "Chat started" });
 }
 
 window.backToChats = () => {
@@ -165,7 +153,13 @@ window.backToChats = () => {
 window.sendMsg = () => {
   const text = document.getElementById('msgInput').value;
   if(!text) return;
-  push(ref(db, 'chats/' + currentChat), { sender: myId, text, time: Date.now() });
+  const msgData = { sender: myId, text, time: Date.now() };
+  push(ref(db, 'chats/' + currentChat), msgData);
+  
+  // THIS IS THE FIX: Save last message to chatList
+  update(ref(db, 'chatList/' + myId + '/' + currentFriend), { lastTime: Date.now(), lastMsg: text });
+  update(ref(db, 'chatList/' + currentFriend + '/' + myId), { lastTime: Date.now(), lastMsg: text });
+  
   document.getElementById('msgInput').value = "";
 }
 
@@ -174,22 +168,21 @@ function checkBlocked(){
     const blocked = snap.val();
     document.getElementById('blockedBanner').classList.toggle('hidden', !blocked);
     document.getElementById('inputArea').classList.toggle('disabled', blocked);
-    document.getElementById('msgInput').disabled = blocked;
   });
 }
 
 window.blockUser = () => {
   if(confirm("Block " + currentFriend + "?")){
     set(ref(db, 'blocked/' + myId + '/' + currentFriend), true);
+    remove(ref(db, 'chatList/' + myId + '/' + currentFriend)); // remove from list
     hideChatMenu();
-    alert(currentFriend + " blocked");
+    backToChats();
   }
 }
 
 window.deleteChat = () => {
   if(confirm("Delete this chat for you?")){
     remove(ref(db, 'chatList/' + myId + '/' + currentFriend));
-    remove(ref(db, 'chats/' + currentChat));
     hideChatMenu();
     backToChats();
   }
@@ -220,25 +213,17 @@ function loadChats() {
       return;
     }
     Object.keys(chats).forEach(fid => {
-      onValue(ref(db, 'blocked/' + myId + '/' + fid), blockSnap => {
-        if(blockSnap.val()) return; // hide blocked chats
-        const chatId = [myId, fid].sort().join('_');
-        onValue(ref(db, 'chats/' + chatId), msgSnap => {
-          const msgs = msgSnap.val();
-          const lastMsg = msgs ? Object.values(msgs).pop() : {text:"No messages yet"};
-          const div = document.createElement('div');
-          div.className = 'chatItem';
-          div.onclick = () => { document.getElementById('friendIdInput').value = fid; startChat(); }
-          div.innerHTML = `
-            <div class="avatar">${fid[4]}</div>
-            <div class="chatInfo">
-              <div class="chatName">${fid}</div>
-              <div class="lastMsg">${lastMsg.text}</div>
-            </div>
-          `;
-          list.appendChild(div);
-        }, {onlyOnce: true});
-      });
+      const div = document.createElement('div');
+      div.className = 'chatItem';
+      div.onclick = () => { document.getElementById('friendIdInput').value = fid; startChat(); }
+      div.innerHTML = `
+        <div class="avatar">${fid[4]}</div>
+        <div class="chatInfo">
+          <div class="chatName">${fid}</div>
+          <div class="lastMsg">${chats[fid].lastMsg || 'No messages'}</div>
+        </div>
+      `;
+      list.appendChild(div);
     });
   });
 }
