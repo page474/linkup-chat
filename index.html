@@ -1,198 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LinkUp</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#00a884">
-
-<style>
-* { box-sizing: border-box; }
-body { margin: 0; background: #111b21; color: white; font-family: Arial, sans-serif; }
-#loadingScreen { position: fixed; inset: 0; z-index: 99999; background: #111b21; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity.5s ease, visibility.5s ease; }
-#loadingScreen.hide { opacity: 0; visibility: hidden; }
-.loading-logo { width: 95px; height: 95px; border-radius: 28px; background: linear-gradient(135deg, #00a884, #008f72); display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 40px rgba(0,168,132,.25); animation: logoPulse 1.6s infinite ease-in-out; }
-.loading-logo svg { width: 55px; height: 55px; stroke-width: 2; color: white; }
-.loading-title { font-size: 32px; font-weight: bold; margin-top: 22px; }
-.loading-subtitle { color: #8696a0; margin-top: 7px; font-size: 14px; }
-.loading-spinner { width: 30px; height: 30px; margin-top: 35px; border: 3px solid #2a3942; border-top-color: #00a884; border-radius: 50%; animation: spin.8s linear infinite; }
-.loading-status { color: #8696a0; font-size: 12px; margin-top: 14px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes logoPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-.app { height: 100dvh; max-width: 900px; margin: auto; padding-bottom: 70px; }
-.topbar { background: #202c33; }
-.me { background: #005c4b; }
-.them { background: #202c33; }
-.chat-img { max-width: 260px; border-radius: 8px; }
-.avatar { background: linear-gradient(135deg,#7c3aed,#2563eb); }
-.recording { animation: pulse 1s infinite; }
-@keyframes pulse { 50% { transform: scale(1.1); } }
-.chat-area { background-color: #0b141a; background-image: radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px); background-size: 20px 20px; }
-.empty-state { text-align: center; color: #8696a0; margin-top: 40%; }
-.msg-wrap { position: relative; }
-.msg-menu { position: absolute; right: 10px; top: -35px; background: #233138; padding: 8px 12px; border-radius: 8px; display: none; z-index: 10; cursor: pointer; }
-.deleted { color: #8696a0; font-style: italic; }
-.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 900px; background: #202c33; border-top: 1px solid #344047; z-index: 100; display: grid; grid-template-columns: repeat(4, 1fr); }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkUp</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00BFA6">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: #0A0E13; color: #fff; height: 100vh; overflow: hidden; }
+    #splash { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #00BFA6 0%, #00897B 100%); }
+    #splash img { width: 100px; height: 100px; background: #fff; border-radius: 24px; margin-bottom: 20px; }
+    #splash h1 { font-size: 32px; margin-bottom: 8px; }
+    #splash p { opacity: 0.8; }
+    .loader { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-top: 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    #app { display: none; height: 100vh; }
+  </style>
 </head>
 <body>
+  <div id="splash">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%2300BFA6'/%3E%3C/svg%3E">
+    <h1>LinkUp</h1>
+    <p>Stay connected</p>
+    <div class="loader"></div>
+  </div>
 
-<div id="loadingScreen">
-  <div class="loading-logo"><i data-lucide="message-circle"></i></div>
-  <div class="loading-title">LinkUp</div>
-  <div class="loading-subtitle">Stay connected</div>
-  <div class="loading-spinner"></div>
-  <div id="loadingStatus" class="loading-status">Starting LinkUp...</div>
-</div>
+  <div id="app">
+    <h2>LinkUp is Loading...</h2>
+    <p>If you see this, Firebase don connect ✅</p>
+  </div>
 
-<div class="app">
+  <script type="module">
+    // IMPORT FIREBASE
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-<section id="homeScreen" class="h-full flex-col">
-  <header class="topbar p-4 flex justify-between items-center">
-    <div><h1 class="text-2xl font-bold">LinkUp</h1><p class="text-sm text-gray-400">Your chats</p></div>
-    <div class="flex gap-2"><button onclick="installApp()" id="installBtn" class="hidden bg-[#00a884] px-3 py-1 rounded-full text-sm font-bold">Install</button><button onclick="openProfile()"><i data-lucide="settings" class="w-6 h-6"></i></button></div>
-  </header>
-  <div class="p-3"><div class="flex gap-2"><input id="newId" placeholder="Enter friend's LinkUp ID" class="flex-1 bg-[#202c33] rounded-full px-4 py-3"><button onclick="startNew()" class="bg-[#00a884] w-12 h-12 rounded-full flex items-center justify-center"><i data-lucide="plus" class="w-6 h-6"></i></button></div></div>
-  <div id="chatList" class="flex-1 overflow-y-auto"></div>
-</section>
+    // YOUR FIREBASE CONFIG - I put your own here
+    const firebaseConfig = {
+      apiKey: "AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      authDomain: "linkup-xxxxx.firebaseapp.com",
+      projectId: "linkup-xxxxx",
+      storageBucket: "linkup-xxxxx.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:xxxxxxxxxxxxxxxx"
+    };
 
-<section id="chatScreen" class="hidden h-full flex-col">
-  <header class="topbar p-3 flex items-center gap-3"><button onclick="backHome()"><i data-lucide="arrow-left" class="w-6 h-6"></i></button><div id="chatAvatar" class="avatar w-11 h-11 rounded-full flex items-center justify-center font-bold">A</div><div class="flex-1"><p id="chatWith" class="font-bold"></p><p id="chatIdSmall" class="text-xs text-gray-400"></p></div></header>
-  <main id="msgs" class="chat-area flex-1 overflow-y-auto p-3 space-y-2"><div class="empty-state"><i data-lucide="message-circle" class="w-16 h-16 mx-auto opacity-20"></i><p class="mt-4">No messages yet</p><p class="text-sm">Send a message to start chatting</p></div></main>
-  <div class="topbar p-2 mt-auto"><div class="flex gap-2 items-center"><input type="file" id="fileInput" class="hidden" accept="image/*,video/*,.pdf,.doc,.zip" onchange="sendFile(event)"><button onclick="document.getElementById('fileInput').click()"><i data-lucide="paperclip" class="w-6 h-6"></i></button><input id="msg" placeholder="Message" class="flex-1 bg-[#2a3942] rounded-full px-4 py-3"><button id="voiceBtn" onmousedown="startRecord()" onmouseup="stopRecord()"><i data-lucide="mic" class="w-6 h-6"></i></button><button onclick="send()" class="bg-[#00a884] w-11 h-11 rounded-full flex items-center justify-center"><i data-lucide="send" class="w-5 h-5"></i></button></div></div>
-</section>
+    // INIT FIREBASE
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-<section id="profileScreen" class="hidden h-full flex-col">
-  <header class="topbar p-4 flex items-center gap-3"><button onclick="backHome()"><i data-lucide="arrow-left" class="w-6 h-6"></i></button><h2 class="text-xl font-bold">Profile</h2></header>
-  <div class="p-6"><div id="profileAvatar" class="avatar w-28 h-28 rounded-full flex items-center justify-center text-4xl font-bold mx-auto"></div><label class="text-gray-400 text-sm mt-5 block">Name</label><input id="profileName" class="w-full bg-[#202c33] rounded-lg p-3 mt-1"><label class="text-gray-400 text-sm block mt-5">About</label><input id="profileAbout" class="w-full bg-[#202c33] rounded-lg p-3 mt-1"><label class="text-gray-400 text-sm block mt-5">Your LinkUp ID</label><div id="profileId" class="bg-[#202c33] rounded-lg p-3 mt-1 text-[#00a884]"></div><button onclick="saveProfile()" class="w-full bg-[#00a884] rounded-lg py-3 mt-6 font-bold">Save Profile</button></div>
-</section>
+    console.log("Firebase Connected ✅");
 
-<section id="statusScreen" class="hidden h-full flex-col">
-  <header class="topbar p-4 flex items-center gap-3"><button onclick="backHome()"><i data-lucide="arrow-left" class="w-6 h-6"></i></button><h2 class="text-xl font-bold">Updates</h2></header>
-  <div class="p-4"><button onclick="createStatus()" class="w-full bg-[#202c33] p-4 rounded-lg text-left flex gap-3"><i data-lucide="plus-circle" class="w-6 h-6"></i><div><b>Add status</b><p class="text-sm text-gray-400">Share a text status</p></div></button><h3 class="font-bold mt-6 mb-3">Recent updates</h3><div id="statusList"></div></div>
-</section>
+    // CHECK IF USER LOGIN
+    onAuthStateChanged(auth, (user) => {
+      document.getElementById('splash').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      
+      if (user) {
+        console.log("User logged in:", user.uid);
+      } else {
+        console.log("No user, show login screen");
+      }
+    });
 
-<section id="callsScreen" class="hidden h-full flex-col">
-  <header class="topbar p-4"><h2 class="text-xl font-bold">Calls</h2></header>
-  <div class="p-4 text-center text-gray-400 mt-10"><i data-lucide="phone" class="w-16 h-16 mx-auto opacity-20"></i><p class="mt-4">Call feature coming soon 🚀</p></div>
-</section>
+    // TIMEOUT AFTER 5 SECONDS IF FIREBASE FAIL
+    setTimeout(() => {
+      if(document.getElementById('splash').style.display !== 'none') {
+        document.getElementById('splash').style.display = 'none';
+        document.getElementById('app').innerHTML = '<h2>Error: Check Firebase Config</h2><p>Open console to see error</p>';
+        document.getElementById('app').style.display = 'block';
+      }
+    }, 5000);
 
-</div>
-
-<nav class="bottom-nav py-2 text-center">
-  <button onclick="showHome()" id="navChats" class="flex flex-col items-center text-[#00a884]"><i data-lucide="message-circle" class="w-6 h-6"></i><span class="text-xs mt-1">Chats</span></button>
-  <button onclick="showStatus()" id="navStatus" class="flex flex-col items-center text-gray-400"><i data-lucide="circle" class="w-6 h-6"></i><span class="text-xs mt-1">Updates</span></button>
-  <button onclick="showCommunities()" id="navComm" class="flex flex-col items-center text-gray-400"><i data-lucide="users" class="w-6 h-6"></i><span class="text-xs mt-1">Groups</span></button>
-  <button onclick="showCalls()" id="navCalls" class="flex flex-col items-center text-gray-400"><i data-lucide="phone" class="w-6 h-6"></i><span class="text-xs mt-1">Calls</span></button>
-</nav>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, push, onChildAdded, onChildChanged, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
-  authDomain: "linkup-chat-3fdd5.firebaseapp.com",
-  databaseURL: "https://linkup-chat-3fdd5-default-rtdb.firebaseio.com",
-  projectId: "linkup-chat-3fdd5",
-  appId: "1:177573067619:web:40e64ae330bb86200e7156"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-let myId = "LinkUp_GUEST";
-let currentChat = "";
-let currentFriendId = "";
-let mediaRecorder;
-let audioChunks = [];
-let appLoaded = false;
-
-lucide.createIcons();
-
-function loadingText(text) { document.getElementById("loadingStatus").innerText = text; }
-function hideLoading() { if(appLoaded) return; appLoaded = true; const screen = document.getElementById("loadingScreen"); screen.classList.add("hide"); setTimeout(() => { screen.style.display = "none"; }, 600); }
-
-// AUTO SKIP AFTER 5 SECONDS
-setTimeout(() => { loadingText("Opening offline..."); setTimeout(hideLoading, 1000); }, 5000);
-
-loadingText("Connecting to LinkUp...");
-
-signInAnonymously(auth).catch(error => {
-  console.error(error);
-  loadingText("Offline mode");
-  myId = "LinkUp_" + Math.random().toString(36).substr(2, 8).toUpperCase();
-  document.getElementById("profileId").innerText = myId;
-  hideLoading();
-});
-
-onAuthStateChanged(auth, async user => {
-  if (!user) return;
-  loadingText("Syncing account...");
-  myId = "LinkUp_" + user.uid.substring(0, 8).toUpperCase();
-  document.getElementById("profileId").innerText = myId;
-  await createUser();
-  loadChats();
-  loadProfile();
-  loadStatuses();
-  loadingText("LinkUp is ready");
-  setTimeout(() => { hideLoading(); }, 500);
-});
-
-async function createUser(){ try{ const snap = await get(ref(db, "users/"+myId)); if(!snap.exists()){ await set(ref(db, "users/"+myId), {id: myId, name: myId, about: "Available on LinkUp"}); } }catch(e){} }
-
-function show(s) { 
-  ["homeScreen","chatScreen","profileScreen","statusScreen","callsScreen"].forEach(id=>document.getElementById(id).classList.add("hidden")); 
-  document.getElementById(s).classList.remove("hidden"); 
-  document.getElementById(s).classList.add("flex");
-  lucide.createIcons();
-  document.querySelectorAll(".bottom-nav button").forEach(b=>{b.classList.add("text-gray-400"); b.classList.remove("text-[#00a884]")});
-  if(s==="homeScreen") document.getElementById("navChats").classList.add("text-[#00a884]");
-  if(s==="statusScreen") document.getElementById("navStatus").classList.add("text-[#00a884]");
-  if(s==="callsScreen") document.getElementById("navCalls").classList.add("text-[#00a884]");
-}
-
-window.showHome = ()=>show("homeScreen");
-window.showStatus = ()=>show("statusScreen");
-window.showCalls = ()=>show("callsScreen");
-window.showCommunities = ()=>alert("Groups coming soon!");
-window.openProfile = ()=>show("profileScreen");
-window.backHome = ()=>show("homeScreen");
-
-async function loadProfile() { try{ const snap = await get(ref(db, "users/" + myId)); if (snap.exists()) { const data = snap.val(); document.getElementById("profileName").value = data.name || myId; document.getElementById("profileAbout").value = data.about || "Available"; document.getElementById("profileAvatar").innerText = (data.name || myId)[0].toUpperCase(); } }catch(e){} }
-
-window.saveProfile = async () => { const name = document.getElementById("profileName").value.trim(); try{ await update(ref(db, "users/" + myId), {name: name, about: document.getElementById("profileAbout").value}); }catch(e){} alert("Profile Saved"); await loadProfile(); backHome(); };
-
-function loadChats() { try{ onValue(ref(db, "users/" + myId + "/chats"), snap => { const list = document.getElementById("chatList"); list.innerHTML = ""; snap.forEach(child => { const d = child.val(); const displayName = d.name || d.id || "Unknown"; const div = document.createElement("div"); div.className = "flex items-center gap-3 p-3 hover:bg-[#202c33] cursor-pointer"; div.innerHTML = `<div class="avatar w-12 h-12 rounded-full flex items-center justify-center">${displayName[0].toUpperCase()}</div><div class="flex-1"><p class="font-semibold">${displayName}</p><p class="text-sm text-gray-400 truncate">${d.lastMsg||""}</p></div>`; div.onclick = ()=>openChat(d.id, displayName); list.appendChild(div); }); }catch(e){} }
-
-window.startNew = async () => { const fid = document.getElementById("newId").value.trim(); if (!fid) return alert("Enter ID"); if (fid === myId) return alert("You cannot chat with yourself"); const snap = await get(ref(db, "users/" + fid)); const name = snap.exists()? snap.val().name : fid; openChat(fid, name); };
-
-function openChat(fid, name) { currentFriendId = fid; currentChat = [myId, fid].sort().join("_"); show("chatScreen"); document.getElementById("chatWith").innerText = name || fid; document.getElementById("chatIdSmall").innerText = fid; document.getElementById("chatAvatar").innerText = (name||fid)[0].toUpperCase(); document.getElementById("msgs").innerHTML = `<div class="empty-state"><i data-lucide="message-circle" class="w-16 h-16 mx-auto opacity-20"></i><p class="mt-4">No messages yet</p><p class="text-sm">Send a message to start chatting</p></div>`; lucide.createIcons(); try{ set(ref(db, "users/" + myId + "/chats/" + fid), {id: fid, name: name || fid}); set(ref(db, "users/" + fid + "/chats/" + myId), {id: myId, name: document.getElementById("profileName").value}); onChildAdded(ref(db, 'chats/'+currentChat), s => { if(document.getElementById('msgs').querySelector('.empty-state')){ document.getElementById('msgs').innerHTML = ""; } renderMessage(s.key, s.val()); }); onChildChanged(ref(db, 'chats/'+currentChat), s => { const msgDiv = document.getElementById('msg-' + s.key); if(msgDiv) msgDiv.remove(); renderMessage(s.key, s.val()); }); }catch(e){} }
-
-function renderMessage(msgId, m) { const d = document.createElement('div'); d.className = m.sender === myId? 'text-right msg-wrap' : 'text-left msg-wrap'; d.id = 'msg-' + msgId; let content = ''; if(m.deleted){ content = `<div class="inline-block deleted px-3 py-2 rounded-lg">🗑️ This message was deleted</div>`; } else if(m.type === 'image') { content = `<img src="${m.url}" class="chat-img"/>`; } else if(m.type === 'audio') { content = `<audio controls src="${m.url}" class="max-w-xs"></audio>`; } else { content = `<div class="inline-block ${m.sender === myId? 'me' : 'them'} px-3 py-2 rounded-lg max-w-xs">${m.text}</div>`; } if(m.sender === myId &&!m.deleted){ content += `<div class="msg-menu" id="menu-${msgId}" onclick="deleteForMe('${msgId}')">Delete</div>`; } d.innerHTML = content; d.oncontextmenu = (e) => { e.preventDefault(); showMenu(msgId); } d.onclick = () => hideMenu(); document.getElementById('msgs').appendChild(d); document.getElementById('msgs').scrollTop = 99999; }
-
-function showMenu(msgId){ hideMenu(); const menu = document.getElementById('menu-' + msgId); if(menu) menu.style.display = 'block'; }
-function hideMenu(){ document.querySelectorAll('.msg-menu').forEach(m => m.style.display = 'none'); }
-window.deleteForMe = async (msgId) => { try{ await update(ref(db, 'chats/'+currentChat+'/'+msgId), {deleted: true, text: '', url: ''}); }catch(e){} hideMenu(); }
-
-window.send = ()=>{ const input = document.getElementById('msg'); const t = input.value.trim(); if(!t) return; try{ push(ref(db, 'chats/'+currentChat), {sender:myId, text:t, type:'text', time: Date.now()}); }catch(e){} input.value = ''; }
-document.getElementById("msg").addEventListener("keydown", e => { if (e.key === "Enter" &&!e.shiftKey) { e.preventDefault(); window.send(); } });
-
-window.sendFile = e => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(event){ try{ push(ref(db, 'chats/'+currentChat), {sender: myId, type: 'image', url: event.target.result, time: Date.now()}); }catch(e){} } reader.readAsDataURL(file); }
-
-window.startRecord = async ()=>{ try { document.getElementById('voiceBtn').classList.add('recording'); const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); mediaRecorder = new MediaRecorder(stream); audioChunks = []; mediaRecorder.ondataavailable = e => audioChunks.push(e.data); mediaRecorder.start(); } catch (error) { alert("Microphone permission is required."); } }
-window.stopRecord = ()=>{ if (!mediaRecorder) return; document.getElementById('voiceBtn').classList.remove('recording'); mediaRecorder.stop(); mediaRecorder.onstop = () => { const blob = new Blob(audioChunks, { type: 'audio/webm' }); const reader = new FileReader(); reader.readAsDataURL(blob); reader.onloadend = () => { try{ push(ref(db, 'chats/'+currentChat), {sender: myId, type: 'audio', url: reader.result, time: Date.now()}); }catch(e){} } } }
-
-window.createStatus = ()=>{ const status = prompt("Enter your status:"); if(!status) return; try{ set(ref(db, "status/"+myId), {text: status, time: Date.now(), name: document.getElementById("profileName").value}); }catch(e){} }
-function loadStatuses(){ try{ onValue(ref(db, "status"), snap=>{ const list = document.getElementById("statusList"); list.innerHTML=""; snap.forEach(child=>{ const d = child.val(); list.innerHTML += `<div class="bg-[#202c33] p-3 rounded-lg mb-2"><b>${d.name}</b><p>${d.text}</p></div>`; }); }); }catch(e){} }
-
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBtn').classList.remove('hidden'); });
-window.installApp = async () => { if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; document.getElementById('installBtn').classList.add('hidden'); } };
-</script>
+  </script>
 </body>
 </html>
