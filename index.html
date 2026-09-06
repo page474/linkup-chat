@@ -19,45 +19,51 @@
     
     #welcome { padding: 40px 20px; max-width: 400px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; justify-content: center; text-align: center; }
     #welcome h2 { color: #00BFA6; font-size: 28px; margin-bottom: 10px; }
-    #welcome p { color: #aaa; margin-bottom: 30px; }
-    #myId { background: #1A1F25; padding: 20px; border-radius: 12px; font-size: 24px; font-weight: bold; color: #00BFA6; letter-spacing: 2px; margin-bottom: 20px; }
-    #welcome button { width: 100%; padding: 16px; background: #00BFA6; border: none; border-radius: 8px; color: #000; font-weight: bold; font-size: 16px; cursor: pointer; }
+    #myId { background: #1A1F25; padding: 20px; border-radius: 12px; font-size: 24px; font-weight: bold; color: #00BFA6; letter-spacing: 2px; margin: 20px 0; }
+    #welcome button { width: 100%; padding: 16px; background: #00BFA6; border: none; border-radius: 8px; color: #000; font-weight: bold; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
+    
+    #home { padding: 20px; height: 100vh; }
+    #home h2 { color: #00BFA6; margin-bottom: 20px; }
+    #home input { width: 100%; padding: 14px; background: #1A1F25; border: 1px solid #2A3038; border-radius: 8px; color: #fff; font-size: 16px; margin-bottom: 10px; }
+    .chat-btn { background: #1A1F25; padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; border: 1px solid #2A3038; }
     
     #chat { display: flex; flex-direction: column; height: 100vh; }
     #chatHeader { padding: 15px; background: #1A1F25; border-bottom: 1px solid #2A3038; display: flex; justify-content: space-between; align-items: center; }
-    #chatHeader h3 { color: #00BFA6; font-size: 14px; }
-    #chatHeader button { background: #ff4444; border: none; padding: 8px 14px; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; }
+    #chatHeader button { background: #2A3038; border: none; padding: 8px 14px; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; }
     #messages { flex: 1; overflow-y: auto; padding: 15px; background: #0A0E13; }
     .msg { background: #1A1F25; padding: 10px 14px; border-radius: 12px; margin-bottom: 10px; max-width: 75%; word-wrap: break-word; }
     .msg.me { background: #00BFA6; margin-left: auto; color: #000; }
-    .msg .id { font-size: 11px; opacity: 0.7; margin-bottom: 4px; }
     #chatInput { display: flex; padding: 10px; background: #1A1F25; border-top: 1px solid #2A3038; }
     #chatInput input { flex: 1; padding: 12px 16px; background: #0A0E13; border: 1px solid #2A3038; border-radius: 20px; color: #fff; font-size: 15px; outline: none; }
     #chatInput button { margin-left: 10px; padding: 12px 20px; background: #00BFA6; border: none; border-radius: 20px; color: #000; font-weight: bold; cursor: pointer; }
   </style>
 </head>
 <body>
-  <!-- SPLASH SCREEN -->
   <div id="splash">
     <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%2300BFA6'/%3E%3Cpath d='M30 50 L45 65 L70 35' stroke='%23000' stroke-width='8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
     <h1>LinkUp</h1>
-    <p>Stay connected</p>
     <div class="loader"></div>
   </div>
 
-  <!-- WELCOME SCREEN LIKE ZANGI -->
   <div id="welcome" class="hidden">
     <h2>Welcome to LinkUp</h2>
     <p>Your LinkUp ID</p>
     <div id="myId">LNK-000</div>
-    <button onclick="enterChat()">Start Chatting</button>
+    <button onclick="goHome()">Start Chatting</button>
   </div>
 
-  <!-- CHAT SCREEN -->
+  <div id="home" class="hidden">
+    <h2>Start New Chat</h2>
+    <input type="text" id="friendId" placeholder="Enter Friend's ID: LNK-123456">
+    <button onclick="startPrivateChat()" style="width:100%; padding:14px; background:#00BFA6; border:none; border-radius:8px; color:#000; font-weight:bold;">Message</button>
+    <h3 style="margin-top:30px; color:#aaa;">My ID: <span id="myIdHome"></span></h3>
+    <button onclick="logout()" style="margin-top:20px; width:100%; padding:14px; background:#ff4444; border:none; border-radius:8px; color:#fff; font-weight:bold;">Reset ID</button>
+  </div>
+
   <div id="chat" class="hidden">
     <div id="chatHeader">
-      <h3 id="headerId">ID: LNK-000</h3>
-      <button onclick="logout()">Reset</button>
+      <button onclick="goHome()">← Back</button>
+      <h3 id="chatWith">Chatting...</h3>
     </div>
     <div id="messages"></div>
     <div id="chatInput">
@@ -70,7 +76,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getDatabase, ref, push, onValue, serverTimestamp, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
@@ -86,79 +91,86 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
-    const analytics = getAnalytics(app);
 
     let currentUser = null;
     let myLinkUpId = "";
+    let chatId = ""; // room id for 2 people
 
-    // GENERATE RANDOM ID LIKE ZANGI: LNK-847291
     function generateId() {
       const num = Math.floor(100000 + Math.random() * 900000);
       return `LNK-${num}`;
     }
 
-    // AUTO LOGIN ANONYMOUSLY
-    signInAnonymously(auth).catch(e => alert(e.message));
+    // Create chat room ID from 2 IDs so both phones see same room
+    function getChatId(id1, id2) {
+      return [id1, id2].sort().join('_');
+    }
+
+    signInAnonymously(auth);
 
     onAuthStateChanged(auth, (user) => {
       setTimeout(() => {
         document.getElementById('splash').classList.add('hidden');
         if (user) {
           currentUser = user;
-          
-          // Check if user already get ID, if not generate new one
           const userRef = ref(db, 'users/' + user.uid);
           onValue(userRef, (snap) => {
             if(snap.exists()) {
               myLinkUpId = snap.val().linkupId;
             } else {
               myLinkUpId = generateId();
-              set(userRef, { linkupId: myLinkUpId, createdAt: serverTimestamp() });
+              set(userRef, { linkupId: myLinkUpId });
             }
             document.getElementById('myId').innerText = myLinkUpId;
-            document.getElementById('headerId').innerText = `ID: ${myLinkUpId}`;
+            document.getElementById('myIdHome').innerText = myLinkUpId;
             document.getElementById('welcome').classList.remove('hidden');
           }, { onlyOnce: true });
-          
         }
       }, 1500);
     });
 
-    window.enterChat = () => {
+    window.goHome = () => {
       document.getElementById('welcome').classList.add('hidden');
+      document.getElementById('chat').classList.add('hidden');
+      document.getElementById('home').classList.remove('hidden');
+    }
+
+    window.startPrivateChat = () => {
+      const friendId = document.getElementById('friendId').value.trim().toUpperCase();
+      if(!friendId.startsWith('LNK-')) return alert("Enter correct ID like LNK-123456");
+      if(friendId === myLinkUpId) return alert("That is your own ID 😂");
+      
+      chatId = getChatId(myLinkUpId, friendId);
+      document.getElementById('chatWith').innerText = friendId;
+      document.getElementById('home').classList.add('hidden');
       document.getElementById('chat').classList.remove('hidden');
       loadMessages();
     }
 
     window.logout = () => {
-      if(confirm("This go reset your ID. Continue?")) signOut(auth).then(() => window.location.reload());
+      if(confirm("Reset go give you new ID. Continue?")) signOut(auth).then(() => window.location.reload());
     }
 
     window.sendMsg = async () => {
       const input = document.getElementById('msgInput');
-      if(input.value.trim() === '') return;
-      push(ref(db, "messages"), {
+      if(input.value.trim() === '' || !chatId) return;
+      push(ref(db, "chats/" + chatId + "/messages"), {
         text: input.value,
-        uid: currentUser.uid,
-        linkupId: myLinkUpId,
+        from: myLinkUpId,
         timestamp: serverTimestamp()
       });
       input.value = '';
     }
 
     function loadMessages() {
-      const messagesRef = ref(db, "messages");
+      const messagesRef = ref(db, "chats/" + chatId + "/messages");
       onValue(messagesRef, (snapshot) => {
         const messagesDiv = document.getElementById('messages');
         messagesDiv.innerHTML = '';
         snapshot.forEach(child => {
           const msg = child.val();
-          const isMe = msg.uid === currentUser.uid;
-          messagesDiv.innerHTML += `
-            <div class="msg ${isMe ? 'me' : ''}">
-              <div class="id">${msg.linkupId}</div>
-              ${msg.text}
-            </div>`;
+          const isMe = msg.from === myLinkUpId;
+          messagesDiv.innerHTML += `<div class="msg ${isMe ? 'me' : ''}">${msg.text}</div>`;
         });
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });
