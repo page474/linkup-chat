@@ -34,6 +34,16 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 .inputArea input{flex:1;background:#0A0E13;border:1px solid #263442;border-radius:25px;padding:12px 16px;color:#fff;outline:none}
 .inputArea button{width:44px;height:44px;border-radius:50%;background:#00BFA6;border:none;color:#000;font-size:20px}
 .inputArea.disabled{opacity:0.5;pointer-events:none}
+
+/* SETTINGS */
+.settingItem{display:flex;align-items:center;padding:15px;border-bottom:1px solid #1E2A36;cursor:pointer}
+.settingIcon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:15px;font-size:20px}
+.settingInfo{flex:1}
+.settingTitle{font-size:16px;margin-bottom:3px}
+.settingDesc{font-size:12px;color:#8A9BA8}
+.profileBox{background:#121A22;padding:20px;display:flex;align-items:center;border-bottom:1px solid #1E2A36}
+.profileAvatar{width:60px;height:60px;border-radius:50%;background:#00BFA6;color:#000;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;margin-right:15px}
+
 .popup{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}
 .popupBox{background:#121A22;padding:20px;border-radius:12px;width:90%;max-width:400px;max-height:70vh;overflow-y:auto}
 .popupBtn{width:100%;padding:14px;background:#00BFA6;border:none;border-radius:8px;color:#000;font-weight:bold;margin-top:10px}
@@ -59,10 +69,73 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 <div id="chatsScreen" class="screen hidden">
   <div class="header">
     <h1>LinkUp</h1>
+    <div class="headerBtn" onclick="showSettings()">⚙️</div>
     <div class="headerBtn" onclick="toggleMenu()">⋮</div>
   </div>
   <div id="chatList"></div>
   <button class="fab" onclick="showNewChat()">+</button>
+</div>
+
+<!-- SETTINGS SCREEN -->
+<div id="settingsScreen" class="screen hidden">
+  <div class="header"><div class="back" onclick="backToChats()">←</div><h1>Settings</h1></div>
+
+  <div class="profileBox">
+    <div class="profileAvatar" id="profileAvatar"></div>
+    <div>
+      <div style="font-size:18px;font-weight:bold" id="profileId"></div>
+      <div style="color:#8A9BA8;font-size:14px">Your LinkUp ID</div>
+    </div>
+  </div>
+
+  <div class="settingItem" onclick="alert('Coming Soon')">
+    <div class="settingIcon" style="background:#4CAF50">📱</div>
+    <div class="settingInfo">
+      <div class="settingTitle">Your Private Number</div>
+      <div class="settingDesc">LinkUp ID based</div>
+    </div>
+  </div>
+
+  <div class="settingItem" onclick="inviteFriends()">
+    <div class="settingIcon" style="background:#9C27B0">👤</div>
+    <div class="settingTitle">Invite Friends</div>
+  </div>
+
+  <div class="settingItem" onclick="alert('Coming Soon')">
+    <div class="settingIcon" style="background:#2196F3">💬</div>
+    <div class="settingTitle">Chats</div>
+  </div>
+
+  <div class="settingItem" onclick="alert('Coming Soon')">
+    <div class="settingIcon" style="background:#4CAF50">🔒</div>
+    <div class="settingTitle">Privacy</div>
+  </div>
+
+  <div class="settingItem" onclick="alert('Coming Soon')">
+    <div class="settingIcon" style="background:#F44336">🔔</div>
+    <div class="settingTitle">Notifications</div>
+  </div>
+
+  <div class="settingItem" onclick="alert('Coming Soon')">
+    <div class="settingIcon" style="background:#4CAF50">💾</div>
+    <div class="settingTitle">Data Storage</div>
+  </div>
+
+  <div class="settingItem" onclick="changeTextSize()">
+    <div class="settingIcon" style="background:#673AB7">T</div>
+    <div class="settingTitle">Text Size</div>
+  </div>
+
+  <div class="settingItem" onclick="alert('LinkUp v2.6.0')">
+    <div class="settingIcon" style="background:#607D8B">i</div>
+    <div class="settingTitle">About</div>
+    <div style="color:#8A9BA8">v2.6.0</div>
+  </div>
+
+  <div class="settingItem" onclick="switchAccount()">
+    <div class="settingIcon" style="background:#FF9800">🔄</div>
+    <div class="settingTitle">Switch account</div>
+  </div>
 </div>
 
 <!-- CHAT SCREEN -->
@@ -102,7 +175,6 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 <div id="broadcastPopup" class="popup hidden">
   <div class="popupBox">
     <h2>New Broadcast</h2>
-    <p style="color:#8A9BA8;font-size:14px;margin-bottom:10px">Select people to send message</p>
     <div id="broadcastList"></div>
     <input id="broadcastMsg" type="text" placeholder="Type broadcast message" style="width:100%;padding:12px;background:#0A0E13;border:1px solid #263442;border-radius:8px;color:#fff;margin:15px 0">
     <button class="popupBtn" onclick="sendBroadcast()">Send Broadcast</button>
@@ -166,16 +238,40 @@ window.joinApp = () => {
 function showApp(){
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('chatsScreen').classList.remove('hidden');
+  document.getElementById('profileId').innerText = myId;
+  document.getElementById('profileAvatar').innerText = myId[4];
   loadChats();
 }
 
+// SETTINGS
+window.showSettings = () => {
+  document.getElementById('chatsScreen').classList.add('hidden');
+  document.getElementById('settingsScreen').classList.remove('hidden');
+}
+window.backToChats = () => {
+  document.getElementById('chatScreen').classList.add('hidden');
+  document.getElementById('settingsScreen').classList.add('hidden');
+  document.getElementById('chatsScreen').classList.remove('hidden');
+  loadChats();
+}
+
+window.inviteFriends = () => {
+  navigator.clipboard.writeText("Join me on LinkUp! My ID: " + myId);
+  alert("Invite copied! Share your ID: " + myId);
+}
+window.changeTextSize = () => {
+  const size = prompt("Enter text size: 12-20", "16");
+  if(size) document.body.style.fontSize = size + "px";
+}
+
+// OTHER FUNCTIONS
 window.toggleMenu = () => document.getElementById('mainMenu').classList.toggle('hidden');
 window.showNewChat = () => document.getElementById('newChatPopup').classList.remove('hidden');
 window.hideNewChat = () => document.getElementById('newChatPopup').classList.add('hidden');
 window.showChatMenu = () => document.getElementById('chatMenu').classList.remove('hidden');
 window.hideChatMenu = () => document.getElementById('chatMenu').classList.add('hidden');
 
-// 1. NEW BROADCAST
+// BROADCAST
 window.showNewBroadcast = () => {
   toggleMenu();
   document.getElementById('broadcastPopup').classList.remove('hidden');
@@ -197,7 +293,6 @@ window.sendBroadcast = () => {
   const msg = document.getElementById('broadcastMsg').value;
   if(!msg) return alert("Type message");
   const checked = [...document.querySelectorAll('#broadcastList input:checked')].map(i => i.value);
-  if(checked.length === 0) return alert("Select at least 1 person");
   checked.forEach(fid => {
     const chatId = [myId, fid].sort().join('_');
     push(ref(db, 'chats/' + chatId), { sender: myId, text: "[Broadcast] " + msg, time: Date.now() });
@@ -208,21 +303,15 @@ window.sendBroadcast = () => {
   hideBroadcast();
 }
 
-// 2. STARRED
-window.showStarred = () => {
-  toggleMenu();
-  document.getElementById('starredPopup').classList.remove('hidden');
-  loadStarred();
-}
+// STARRED
+window.showStarred = () => { toggleMenu(); document.getElementById('starredPopup').classList.remove('hidden'); loadStarred(); }
 window.hideStarred = () => document.getElementById('starredPopup').classList.add('hidden');
 function loadStarred(){
   const list = document.getElementById('starredList');
-  list.innerHTML = "Loading...";
   onValue(ref(db, 'starred/' + myId), snap => {
     const starred = snap.val();
-    list.innerHTML = "";
-    if(!starred) return list.innerHTML = `<div style="color:#8A9BA8;text-align:center;padding:20px">No starred chats</div>`;
-    Object.keys(starred).forEach(fid => {
+    list.innerHTML =!starred? `<div style="color:#8A9BA8;text-align:center;padding:20px">No starred chats</div>` : "";
+    if(starred) Object.keys(starred).forEach(fid => {
       list.innerHTML += `<div class="chatItem" onclick="document.getElementById('friendIdInput').value='${fid}'; startChat(); hideStarred()"><div class="avatar">${fid[4]}</div><div class="chatName">${fid}</div></div>`;
     });
   }, {onlyOnce: true});
@@ -230,14 +319,12 @@ function loadStarred(){
 window.toggleStar = () => {
   const starredRef = ref(db, 'starred/' + myId + '/' + currentFriend);
   onValue(starredRef, snap => {
-    if(snap.val()){ remove(starredRef); alert("Removed from starred"); }
-    else{ set(starredRef, true); alert("Added to starred"); }
-    hideChatMenu();
-    loadChats();
+    snap.val()? remove(starredRef) : set(starredRef, true);
+    hideChatMenu(); loadChats();
   }, {onlyOnce: true});
 }
 
-// 3. SWITCH ACCOUNT
+// SWITCH ACCOUNT
 window.switchAccount = () => {
   if(confirm("Logout and switch account?")){
     localStorage.removeItem('linkupId');
@@ -245,25 +332,17 @@ window.switchAccount = () => {
   }
 }
 
+// CHAT FUNCTIONS
 window.startChat = () => {
   const fid = document.getElementById('friendIdInput').value.toUpperCase();
   if(!fid || fid === myId) return alert("Enter valid ID");
-  currentFriend = fid;
-  currentChat = [myId, fid].sort().join('_');
+  currentFriend = fid; currentChat = [myId, fid].sort().join('_');
   document.getElementById('chatWithId').innerText = fid;
   document.getElementById('chatsScreen').classList.add('hidden');
   document.getElementById('chatScreen').classList.remove('hidden');
-  hideNewChat();
-  checkBlocked();
-  loadMessages();
+  hideNewChat(); checkBlocked(); loadMessages();
   update(ref(db, 'chatList/' + myId + '/' + fid), { lastTime: Date.now(), lastMsg: "Chat started" });
   update(ref(db, 'chatList/' + fid + '/' + myId), { lastTime: Date.now(), lastMsg: "Chat started" });
-}
-
-window.backToChats = () => {
-  document.getElementById('chatScreen').classList.add('hidden');
-  document.getElementById('chatsScreen').classList.remove('hidden');
-  loadChats();
 }
 
 window.sendMsg = () => {
@@ -287,38 +366,25 @@ window.blockUser = () => {
   if(confirm("Block " + currentFriend + "?")){
     set(ref(db, 'blocked/' + myId + '/' + currentFriend), true);
     remove(ref(db, 'chatList/' + myId + '/' + currentFriend));
-    hideChatMenu();
-    backToChats();
+    hideChatMenu(); backToChats();
   }
 }
-
-window.unblockUser = () => {
-  remove(ref(db, 'blocked/' + myId + '/' + currentFriend));
-  checkBlocked();
-}
-
+window.unblockUser = () => remove(ref(db, 'blocked/' + myId + '/' + currentFriend));
 window.deleteChat = () => {
   if(confirm("Delete this chat for you?")){
     remove(ref(db, 'chatList/' + myId + '/' + currentFriend));
-    hideChatMenu();
-    backToChats();
+    hideChatMenu(); backToChats();
   }
 }
 
-window.showBlocked = () => {
-  toggleMenu();
-  document.getElementById('blockedPopup').classList.remove('hidden');
-  loadBlockedList();
-}
+window.showBlocked = () => { toggleMenu(); document.getElementById('blockedPopup').classList.remove('hidden'); loadBlockedList(); }
 window.hideBlocked = () => document.getElementById('blockedPopup').classList.add('hidden');
 function loadBlockedList(){
   const list = document.getElementById('blockedList');
-  list.innerHTML = "Loading...";
   onValue(ref(db, 'blocked/' + myId), snap => {
     const blocked = snap.val();
-    list.innerHTML = "";
-    if(!blocked) return list.innerHTML = `<div style="color:#8A9BA8;text-align:center;padding:20px">No blocked users</div>`;
-    Object.keys(blocked).forEach(fid => {
+    list.innerHTML =!blocked? `<div style="color:#8A9BA8;text-align:center;padding:20px">No blocked users</div>` : "";
+    if(blocked) Object.keys(blocked).forEach(fid => {
       list.innerHTML += `<div style="display:flex;justify-content:space-between;padding:12px"><span>${fid}</span><button onclick="remove(ref(db, 'blocked/' + myId + '/' + fid)); loadBlockedList()" style="background:#d32f2f;border:none;padding:6px 10px;border-radius:6px;color:#fff">Unblock</button></div>`;
     });
   }, {onlyOnce: true});
@@ -343,9 +409,8 @@ function loadChats() {
   onValue(ref(db, 'chatList/' + myId), snap => {
     const chats = snap.val();
     const list = document.getElementById('chatList');
-    list.innerHTML = "";
-    if(!chats) return list.innerHTML = `<div class="empty">💬<br>No chats yet<br>Tap + to start</div>`;
-    onValue(ref(db, 'starred/' + myId), starSnap => {
+    list.innerHTML =!chats? `<div class="empty">💬<br>No chats yet<br>Tap + to start</div>` : "";
+    if(chats) onValue(ref(db, 'starred/' + myId), starSnap => {
       const starred = starSnap.val() || {};
       Object.keys(chats).forEach(fid => {
         const div = document.createElement('div');
