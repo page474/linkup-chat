@@ -9,22 +9,19 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 .hidden{display:none!important}
 .header{background:#121A22;padding:15px 20px;display:flex;align-items:center;border-bottom:1px solid #1E2A36}
 .header h1{flex:1;color:#00BFA6;font-size:20px}
-.back{font-size:24px;cursor:pointer;margin-right:15px;display:flex;align-items:center}
-.headerBtn{font-size:22px;padding:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.headerBtn svg,.back svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.back{font-size:24px;cursor:pointer;margin-right:15px}
 .screen{flex:1;overflow-y:auto;display:flex;flex-direction:column}
 .authBox{margin:auto;text-align:center;padding:40px 20px;width:100%;max-width:400px}
 .authBox input{width:100%;padding:14px;background:#121A22;border:1px solid #263442;border-radius:8px;color:#fff;margin-bottom:15px}
 .authBtn{width:100%;padding:14px;background:#00BFA6;border:none;border-radius:8px;color:#000;font-weight:bold}
 #chatList{flex:1}
 .chatItem{display:flex;align-items:center;padding:15px;border-bottom:1px solid #1E2A36;cursor:pointer}
-.chatItem.starred{border-left:4px solid #FFD700}
 .avatar{width:50px;height:50px;border-radius:50%;background:#00BFA6;color:#000;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:12px;font-size:18px}
 .chatInfo{flex:1;min-width:0}
 .chatName{font-weight:bold;margin-bottom:4px}
 .lastMsg{color:#8A9BA8;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#00BFA6;border:none;color:#000;display:flex;align-items:center;justify-content:center}
-.fab svg{width:27px;height:27px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.headerBtn{font-size:22px;padding:10px;cursor:pointer}
+.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#00BFA6;border:none;color:#000;font-size:28px}
 .empty{text-align:center;color:#71808d;padding:60px 20px}
 #messages{flex:1;padding:15px;overflow-y:auto}
 .msg{background:#1E2A36;padding:10px 14px;border-radius:12px;margin-bottom:8px;max-width:75%;width:fit-content}
@@ -33,27 +30,15 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 .blockedBanner{background:#5e2a2a;color:#ff8080;padding:10px;text-align:center;font-size:14px}
 .inputArea{display:flex;padding:10px;background:#121A22;border-top:1px solid #1E2A36;gap:8px}
 .inputArea input{flex:1;background:#0A0E13;border:1px solid #263442;border-radius:25px;padding:12px 16px;color:#fff;outline:none}
-.inputArea button{width:44px;height:44px;border-radius:50%;background:#00BFA6;border:none;color:#000;display:flex;align-items:center;justify-content:center}
-.inputArea button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.inputArea button{width:44px;height:44px;border-radius:50%;background:#00BFA6;border:none;color:#000;font-size:20px}
 .inputArea.disabled{opacity:0.5;pointer-events:none}
-.settingItem{display:flex;align-items:center;padding:15px;border-bottom:1px solid #1E2A36;cursor:pointer}
-.settingIcon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:15px}
-.settingIcon svg{width:21px;height:21px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.settingInfo{flex:1}
-.settingTitle{font-size:16px;margin-bottom:3px}
-.settingDesc{font-size:12px;color:#8A9BA8}
-.profileBox{background:#121A22;padding:20px;display:flex;align-items:center;border-bottom:1px solid #1E2A36}
-.profileAvatar{width:60px;height:60px;border-radius:50%;background:#00BFA6;color:#000;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;margin-right:15px}
 .popup{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}
-.popupBox{background:#121A22;padding:20px;border-radius:12px;width:90%;max-width:400px;max-height:70vh;overflow-y:auto}
-.popupBtn{width:100%;padding:14px;background:#00BFA6;border:none;border-radius:8px;color:#000;font-weight:bold;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px}
-.popupBtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.popupBox{background:#121A22;padding:20px;border-radius:12px;width:90%;max-width:400px}
+.popupBtn{width:100%;padding:14px;background:#00BFA6;border:none;border-radius:8px;color:#000;font-weight:bold;margin-top:10px}
 .danger{background:#d32f2f!important;color:#fff!important}
 .menu{position:absolute;top:50px;right:10px;background:#1E2A36;border-radius:8px;z-index:50;min-width:180px}
-.menuItem{padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:10px}
+.menuItem{padding:12px 20px;cursor:pointer}
 .menuItem:hover{background:#263442}
-.menuItem svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.checkbox{margin-right:10px}
 </style>
 </head>
 <body>
@@ -63,7 +48,7 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
   <div class="authBox">
     <h1 style="color:#00BFA6;font-size:32px;margin-bottom:10px">LinkUp</h1>
     <input id="authIdInput" type="text" placeholder="LNK-123456 or leave blank">
-    <button class="authBtn" onclick="joinApp()">Join LinkUp</button> <!-- FIXED -->
+    <button class="authBtn" onclick="joinApp()">Join LinkUp</button>
   </div>
 </div>
 
@@ -71,14 +56,37 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 <div id="chatsScreen" class="screen hidden">
   <div class="header">
     <h1>LinkUp</h1>
-    <div class="headerBtn" onclick="showSettings()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0.3 1.9l.1.1-1.4 1.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-2v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L9 17l.1-.1a1.7 1.7 0 0 0.3-1.9 1.7 1.7 0 0 0-1.6-1H7v-2h.8a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L9 9l1.4-1.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.2h2v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L20 9l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v2h-.2a1.7 1.7 0 0 0-1.8 1z"></path></svg></div>
-    <div class="headerBtn" onclick="toggleMenu()"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></div>
+    <div class="headerBtn" onclick="toggleMenu()">⋮</div>
   </div>
   <div id="chatList"></div>
-  <button class="fab" onclick="showNewChat()"><svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button>
+  <button class="fab" onclick="showNewChat()">+</button>
 </div>
 
-<!-- REST OF HTML SAME AS YOURS -->
+<!-- CHAT SCREEN -->
+<div id="chatScreen" class="screen hidden">
+  <div class="header">
+    <div class="back" onclick="backToChats()">←</div>
+    <h1 id="chatWithId"></h1>
+    <div class="headerBtn" onclick="showChatMenu()">⋮</div>
+  </div>
+  <div id="blockedBanner" class="blockedBanner hidden">You blocked this user <button onclick="unblockUser()" style="background:#00BFA6;border:none;padding:4px 10px;border-radius:4px;color:#000;margin-left:10px">Unblock</button></div>
+  <div id="messages"></div>
+  <div id="inputArea" class="inputArea">
+    <input id="msgInput" type="text" placeholder="Type message..." onkeypress="if(event.key==='Enter') sendMsg()">
+    <button onclick="sendMsg()">➤</button>
+  </div>
+</div>
+
+<!-- MENU -->
+<div id="mainMenu" class="menu hidden" onclick="event.stopPropagation()">
+  <div class="menuItem" onclick="showBlocked()">Blocked</div>
+  <div class="menuItem" onclick="switchAccount()">Switch account</div>
+</div>
+
+<!-- POPUPS -->
+<div id="newChatPopup" class="popup hidden"><div class="popupBox"><h2>New Chat</h2><input id="friendIdInput" type="text" placeholder="LNK-123456"><button class="popupBtn" onclick="startChat()">Start Chat</button><button class="popupBtn" style="background:#1E2A36;color:#fff" onclick="hideNewChat()">Cancel</button></div></div>
+<div id="chatMenu" class="popup hidden" onclick="hideChatMenu()"><div class="popupBox" onclick="event.stopPropagation()"><h3>Chat Options</h3><button class="popupBtn danger" onclick="blockUser()">Block User</button><button class="popupBtn danger" onclick="deleteChat()">Delete Chat</button><button class="popupBtn" style="background:#1E2A36;color:#fff" onclick="hideChatMenu()">Cancel</button></div></div>
+<div id="blockedPopup" class="popup hidden" onclick="hideBlocked()"><div class="popupBox" onclick="event.stopPropagation()"><h3>Blocked Users</h3><div id="blockedList"></div><button class="popupBtn" style="background:#1E2A36;color:#fff" onclick="hideBlocked()">Close</button></div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -93,36 +101,33 @@ let myId = "", currentChat = "", currentFriend = "";
 if(localStorage.getItem('linkupId')){ myId = localStorage.getItem('linkupId'); showApp(); }
 
 window.joinApp = () => { const inputId = document.getElementById('authIdInput').value.toUpperCase(); myId = inputId && inputId.startsWith("LNK-")? inputId : "LNK-" + Math.floor(100000 + Math.random() * 900000); localStorage.setItem('linkupId', myId); showApp(); }
-function showApp(){ document.getElementById('authScreen').classList.add('hidden'); document.getElementById('chatsScreen').classList.remove('hidden'); document.getElementById('profileId').innerText = myId; document.getElementById('profileAvatar').innerText = myId[4]; loadChats(); }
-window.showSettings = () => { document.getElementById('chatsScreen').classList.add('hidden'); document.getElementById('settingsScreen').classList.remove('hidden'); }
-window.backToChats = () => { document.getElementById('chatScreen').classList.add('hidden'); document.getElementById('settingsScreen').classList.add('hidden'); document.getElementById('chatsScreen').classList.remove('hidden'); loadChats(); }
-window.inviteFriends = () => { navigator.clipboard.writeText("Join me on LinkUp! My ID: " + myId); alert("Invite copied! Share your ID: " + myId); }
-window.changeTextSize = () => { const size = prompt("Enter text size: 12-20", "16"); if(size) document.body.style.fontSize = size + "px"; }
+function showApp(){ document.getElementById('authScreen').classList.add('hidden'); document.getElementById('chatsScreen').classList.remove('hidden'); loadChats(); }
+window.backToChats = () => { document.getElementById('chatScreen').classList.add('hidden'); document.getElementById('chatsScreen').classList.remove('hidden'); loadChats(); }
 window.toggleMenu = () => document.getElementById('mainMenu').classList.toggle('hidden');
 window.showNewChat = () => document.getElementById('newChatPopup').classList.remove('hidden');
 window.hideNewChat = () => document.getElementById('newChatPopup').classList.add('hidden');
 window.showChatMenu = () => document.getElementById('chatMenu').classList.remove('hidden');
 window.hideChatMenu = () => document.getElementById('chatMenu').classList.add('hidden');
-window.showNewBroadcast = () => { toggleMenu(); document.getElementById('broadcastPopup').classList.remove('hidden'); loadBroadcastList(); }
-window.hideBroadcast = () => document.getElementById('broadcastPopup').classList.add('hidden');
-function loadBroadcastList(){ const list = document.getElementById('broadcastList'); list.innerHTML = "Loading..."; onValue(ref(db, 'chatList/' + myId), snap => { const chats = snap.val(); list.innerHTML = ""; if(chats) Object.keys(chats).forEach(fid => { list.innerHTML += `<label style="display:block;padding:8px"><input type="checkbox" class="checkbox" value="${fid}"> ${fid}</label>`; }); }, {onlyOnce: true}); }
-window.sendBroadcast = () => { const msg = document.getElementById('broadcastMsg').value; if(!msg) return alert("Type message"); const checked = [...document.querySelectorAll('#broadcastList input:checked')].map(i => i.value); checked.forEach(fid => { const chatId = [myId, fid].sort().join('_'); push(ref(db, 'chats/' + chatId), { sender: myId, text: "[Broadcast] " + msg, time: Date.now() }); update(ref(db, 'chatList/' + myId + '/' + fid), { lastTime: Date.now(), lastMsg: "[Broadcast] " + msg }); update(ref(db, 'chatList/' + fid + '/' + myId), { lastTime: Date.now(), lastMsg: "[Broadcast] " + msg }); alert("Broadcast sent to " + checked.length + " people"); hideBroadcast(); }
-window.showStarred = () => { toggleMenu(); document.getElementById('starredPopup').classList.remove('hidden'); loadStarred(); }
-window.hideStarred = () => document.getElementById('starredPopup').classList.add('hidden');
-function loadStarred(){ const list = document.getElementById('starredList'); onValue(ref(db, 'starred/' + myId), snap => { const starred = snap.val(); list.innerHTML =!starred? `<div style="color:#8A9BA8;text-align:center;padding:20px">No starred chats</div>` : ""; if(starred) Object.keys(starred).forEach(fid => { list.innerHTML += `<div class="chatItem" onclick="document.getElementById('friendIdInput').value='${fid}'; startChat(); hideStarred()"><div class="avatar">${fid[4]}</div><div class="chatName">${fid}</div></div>`; }); }, {onlyOnce: true}); }
-window.toggleStar = () => { const starredRef = ref(db, 'starred/' + myId + '/' + currentFriend); onValue(starredRef, snap => { snap.val()? remove(starredRef) : set(starredRef, true); hideChatMenu(); loadChats(); }, {onlyOnce: true}); }
 window.switchAccount = () => { if(confirm("Logout and switch account?")){ localStorage.removeItem('linkupId'); location.reload(); } }
+
 window.startChat = () => { const fid = document.getElementById('friendIdInput').value.toUpperCase(); if(!fid || fid === myId) return alert("Enter valid ID"); currentFriend = fid; currentChat = [myId, fid].sort().join('_'); document.getElementById('chatWithId').innerText = fid; document.getElementById('chatsScreen').classList.add('hidden'); document.getElementById('chatScreen').classList.remove('hidden'); hideNewChat(); checkBlocked(); loadMessages(); update(ref(db, 'chatList/' + myId + '/' + fid), { lastTime: Date.now(), lastMsg: "Chat started" }); update(ref(db, 'chatList/' + fid + '/' + myId), { lastTime: Date.now(), lastMsg: "Chat started" }); }
+
 window.sendMsg = () => { const text = document.getElementById('msgInput').value; if(!text) return; push(ref(db, 'chats/' + currentChat), { sender: myId, text, time: Date.now() }); update(ref(db, 'chatList/' + myId + '/' + currentFriend), { lastTime: Date.now(), lastMsg: text }); update(ref(db, 'chatList/' + currentFriend + '/' + myId), { lastTime: Date.now(), lastMsg: text }); document.getElementById('msgInput').value = ""; }
+
 function checkBlocked(){ onValue(ref(db, 'blocked/' + myId + '/' + currentFriend), snap => { const blocked = snap.val(); document.getElementById('blockedBanner').classList.toggle('hidden',!blocked); document.getElementById('inputArea').classList.toggle('disabled', blocked); }); }
+
 window.blockUser = () => { if(confirm("Block " + currentFriend + "?")){ set(ref(db, 'blocked/' + myId + '/' + currentFriend), true); remove(ref(db, 'chatList/' + myId + '/' + currentFriend)); hideChatMenu(); backToChats(); } }
 window.unblockUser = () => remove(ref(db, 'blocked/' + myId + '/' + currentFriend));
 window.deleteChat = () => { if(confirm("Delete this chat for you?")){ remove(ref(db, 'chatList/' + myId + '/' + currentFriend)); hideChatMenu(); backToChats(); } }
 window.showBlocked = () => { toggleMenu(); document.getElementById('blockedPopup').classList.remove('hidden'); loadBlockedList(); }
 window.hideBlocked = () => document.getElementById('blockedPopup').classList.add('hidden');
+
 function loadBlockedList(){ const list = document.getElementById('blockedList'); onValue(ref(db, 'blocked/' + myId), snap => { const blocked = snap.val(); list.innerHTML =!blocked? `<div style="color:#8A9BA8;text-align:center;padding:20px">No blocked users</div>` : ""; if(blocked) Object.keys(blocked).forEach(fid => { list.innerHTML += `<div style="display:flex;justify-content:space-between;padding:12px"><span>${fid}</span><button onclick="remove(ref(db, 'blocked/' + myId + '/' + fid)); loadBlockedList()" style="background:#d32f2f;border:none;padding:6px 10px;border-radius:6px;color:#fff">Unblock</button></div>`; }); }, {onlyOnce: true}); }
+
 function loadMessages() { onValue(ref(db, 'chats/' + currentChat), snap => { const msgs = snap.val(); const box = document.getElementById('messages'); box.innerHTML = ""; if(msgs) Object.values(msgs).forEach(m => { const div = document.createElement('div'); div.className = 'msg ' + (m.sender === myId? 'me' : ''); div.innerHTML = `${m.text}<div class="msgBottom">${new Date(m.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`; box.appendChild(div); }); box.scrollTop = box.scrollHeight; }); }
-function loadChats() { onValue(ref(db, 'chatList/' + myId), snap => { const chats = snap.val(); const list = document.getElementById('chatList'); list.innerHTML =!chats? `<div class="empty">💬<br>No chats yet<br>Tap + to start</div>` : ""; if(chats) onValue(ref(db, 'starred/' + myId), starSnap => { const starred = starSnap.val() || {}; Object.keys(chats).forEach(fid => { const div = document.createElement('div'); div.className = 'chatItem ' + (starred[fid]? 'starred' : ''); div.onclick = () => { document.getElementById('friendIdInput').value = fid; startChat(); } div.innerHTML = `<div class="avatar">${fid[4]}</div><div class="chatInfo"><div class="chatName">${starred[fid]? '⭐ ' : ''}${fid}</div><div class="lastMsg">${chats[fid].lastMsg || 'No messages'}</div></div>`; list.appendChild(div); }); }, {onlyOnce: true}); }
+
+function loadChats() { onValue(ref(db, 'chatList/' + myId), snap => { const chats = snap.val(); const list = document.getElementById('chatList'); list.innerHTML =!chats? `<div class="empty">💬<br>No chats yet<br>Tap + to start</div>` : ""; if(chats) Object.keys(chats).forEach(fid => { const div = document.createElement('div'); div.className = 'chatItem'; div.onclick = () => { document.getElementById('friendIdInput').value = fid; startChat(); } div.innerHTML = `<div class="avatar">${fid[4]}</div><div class="chatInfo"><div class="chatName">${fid}</div><div class="lastMsg">${chats[fid].lastMsg || 'No messages'}</div></div>`; list.appendChild(div); }); }, {onlyOnce: true}); }
+
 document.addEventListener('click', () => document.getElementById('mainMenu').classList.add('hidden'));
 </script>
 </body>
