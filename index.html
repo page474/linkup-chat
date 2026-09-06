@@ -4,15 +4,48 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LinkUp</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 
-<!-- PWA: THIS MAKES IT INSTALLABLE -->
+<!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#00a884">
 
 <style>
-body { background: #111b21; color: white; font-family: Arial; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #111b21; color: white; font-family: Arial, sans-serif; }
+
+/* ========================= LINKUP LOADING SCREEN ========================= */
+#loadingScreen {
+  position: fixed; inset: 0; z-index: 99999;
+  background: #111b21;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity.5s ease, visibility.5s ease;
+}
+#loadingScreen.hide { opacity: 0; visibility: hidden; }
+
+.loading-logo {
+  width: 95px; height: 95px; border-radius: 28px;
+  background: linear-gradient(135deg, #00a884, #008f72);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 40px rgba(0,168,132,.25);
+  animation: logoPulse 1.6s infinite ease-in-out;
+}
+.loading-logo svg { width: 55px; height: 55px; stroke-width: 2; color: white; }
+.loading-title { font-size: 32px; font-weight: bold; margin-top: 22px; letter-spacing:.5px; }
+.loading-subtitle { color: #8696a0; margin-top: 7px; font-size: 14px; }
+.loading-spinner {
+  width: 30px; height: 30px; margin-top: 35px;
+  border: 3px solid #2a3942; border-top-color: #00a884;
+  border-radius: 50%; animation: spin.8s linear infinite;
+}
+.loading-status { color: #8696a0; font-size: 12px; margin-top: 14px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes logoPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+
+/* ========================= APP ========================= */
 .app { height: 100dvh; max-width: 900px; margin: auto; }
 .topbar { background: #202c33; }
 .me { background: #005c4b; }
@@ -28,7 +61,21 @@ body { background: #111b21; color: white; font-family: Arial; }
 .deleted { color: #8696a0; font-style: italic; }
 </style>
 </head>
+
 <body>
+
+<!-- LOADING / SPLASH SCREEN -->
+<div id="loadingScreen">
+  <div class="loading-logo">
+    <i data-lucide="message-circle"></i>
+  </div>
+  <div class="loading-title">LinkUp</div>
+  <div class="loading-subtitle">Stay connected</div>
+  <div class="loading-spinner"></div>
+  <div id="loadingStatus" class="loading-status">Starting LinkUp...</div>
+</div>
+
+<!-- MAIN APP -->
 <div class="app">
 
 <section id="homeScreen" class="h-full flex-col">
@@ -38,7 +85,6 @@ body { background: #111b21; color: white; font-family: Arial; }
       <p id="myIdSmall" class="text-xs text-gray-400"></p>
     </div>
     <div class="flex gap-2">
-      <!-- INSTALL BUTTON -->
       <button onclick="installApp()" id="installBtn" class="hidden bg-[#00a884] px-3 py-1 rounded-full text-sm font-bold">Install</button>
       <button onclick="openProfile()"><i data-lucide="settings" class="w-6 h-6"></i></button>
     </div>
@@ -55,7 +101,6 @@ body { background: #111b21; color: white; font-family: Arial; }
 
   <div id="chatList" class="flex-1 overflow-y-auto"></div>
 
-  <!-- FIXED NAV - NOW HORIZONTAL -->
   <nav class="topbar grid grid-cols-3 py-2 text-center border-t border-[#344047]">
     <button onclick="showHome()" id="navChats" class="flex flex-col items-center text-[#00a884]">
       <i data-lucide="message-circle" class="w-6 h-6"></i><span class="text-xs">Chats</span>
@@ -69,6 +114,7 @@ body { background: #111b21; color: white; font-family: Arial; }
   </nav>
 </section>
 
+<!-- CHAT SCREEN -->
 <section id="chatScreen" class="hidden h-full flex-col">
   <header class="topbar p-3 flex items-center gap-3">
     <button onclick="backHome()"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
@@ -78,7 +124,6 @@ body { background: #111b21; color: white; font-family: Arial; }
       <p id="chatIdSmall" class="text-xs text-gray-400"></p>
     </div>
   </header>
-
   <main id="msgs" class="chat-area flex-1 overflow-y-auto p-3 space-y-2">
     <div class="empty-state">
       <i data-lucide="message-circle" class="w-16 h-16 mx-auto opacity-20"></i>
@@ -86,7 +131,6 @@ body { background: #111b21; color: white; font-family: Arial; }
       <p class="text-sm">Send a message to start chatting</p>
     </div>
   </main>
-
   <div class="topbar p-2 mt-auto">
     <div class="flex gap-2 items-center">
       <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,.pdf,.doc,.zip" onchange="sendFile(event)">
@@ -98,6 +142,7 @@ body { background: #111b21; color: white; font-family: Arial; }
   </div>
 </section>
 
+<!-- PROFILE SCREEN -->
 <section id="profileScreen" class="hidden h-full flex-col">
   <header class="topbar p-4 flex items-center gap-3">
     <button onclick="backHome()"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
@@ -115,6 +160,7 @@ body { background: #111b21; color: white; font-family: Arial; }
   </div>
 </section>
 
+<!-- STATUS SCREEN -->
 <section id="statusScreen" class="hidden h-full flex-col">
   <header class="topbar p-4 flex items-center gap-3">
     <button onclick="backHome()"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
@@ -134,7 +180,7 @@ body { background: #111b21; color: white; font-family: Arial; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, push, onChildAdded, onChildChanged, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, push, onChildAdded, onChildChanged, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -151,33 +197,78 @@ const auth = getAuth(app);
 let myId = "";
 let currentChat = "";
 let currentFriendId = "";
-let mediaRecorder, audioChunks = [];
+let mediaRecorder;
+let audioChunks = [];
 
 lucide.createIcons();
 
-signInAnonymously(auth);
+// ========================= LOADING HELPERS =========================
+function loadingText(text) {
+  const status = document.getElementById("loadingStatus");
+  if (status) status.innerText = text;
+}
+
+function hideLoading() {
+  const screen = document.getElementById("loadingScreen");
+  if (!screen) return;
+  screen.classList.add("hide");
+  setTimeout(() => { screen.style.display = "none"; }, 600);
+}
+
+function showLoading() {
+  const screen = document.getElementById("loadingScreen");
+  if (!screen) return;
+  screen.style.display = "flex";
+  screen.classList.remove("hide");
+}
+
+// Auto hide loading after 8 seconds if something fails
+setTimeout(() => { hideLoading(); }, 8000);
+
+// ========================= START FIREBASE =========================
+loadingText("Connecting to LinkUp...");
+signInAnonymously(auth).catch(error => {
+  console.error(error);
+  loadingText("Unable to connect. Check your internet.");
+  setTimeout(hideLoading, 2000);
+});
+
 onAuthStateChanged(auth, async user => {
   if (!user) return;
+  loadingText("Creating your LinkUp account...");
+  
   myId = "LinkUp_" + user.uid.substring(0, 8).toUpperCase();
   document.getElementById("myIdSmall").innerText = myId;
   document.getElementById("profileId").innerText = myId;
+  
   await createUser();
+  
+  loadingText("Loading your chats...");
   loadChats();
-  loadProfile();
+  
+  loadingText("Loading your profile...");
+  await loadProfile();
+  
+  loadingText("Loading statuses...");
   loadStatuses();
+  
+  loadingText("LinkUp is ready");
+  setTimeout(() => { hideLoading(); }, 500);
 });
 
-async function createUser(){
-  const snap = await get(ref(db, "users/"+myId));
-  if(!snap.exists()){
-    await set(ref(db, "users/"+myId), {id: myId, name: myId, about: "Available on LinkUp"});
+async function createUser() {
+  const snap = await get(ref(db, "users/" + myId));
+  if (!snap.exists()) {
+    await set(ref(db, "users/" + myId), {id: myId, name: myId, about: "Available on LinkUp"});
   }
 }
 
-function show(s){ 
+// ========================= SCREEN NAVIGATION =========================
+function show(s) {
   ["homeScreen","chatScreen","profileScreen","statusScreen"].forEach(id=>document.getElementById(id).classList.add("hidden")); 
-  document.getElementById(s).classList.remove("hidden"); 
-  document.getElementById(s).classList.add("flex");
+  const screen = document.getElementById(s);
+  screen.classList.remove("hidden"); 
+  screen.classList.add("flex");
   lucide.createIcons();
   document.querySelectorAll("nav button").forEach(b=>{b.classList.add("text-gray-400"); b.classList.remove("text-[#00a884]")});
   if(s==="homeScreen") document.getElementById("navChats").classList.add("text-[#00a884]");
@@ -187,29 +278,32 @@ function show(s){
 
 window.showHome = ()=>show("homeScreen");
 window.showStatus = ()=>show("statusScreen");
-window.openProfile = ()=>{show("profileScreen")};
+window.openProfile = ()=>show("profileScreen");
 window.backHome = ()=>show("homeScreen");
 
-async function loadProfile(){
-  const snap = await get(ref(db, "users/"+myId));
-  if(snap.exists()){
-    document.getElementById("profileName").value = snap.val().name || myId;
-    document.getElementById("profileAbout").value = snap.val().about || "Available";
-    document.getElementById("profileAvatar").innerText = (snap.val().name||myId)[0].toUpperCase();
+// ========================= PROFILE =========================
+async function loadProfile() {
+  const snap = await get(ref(db, "users/" + myId));
+  if (snap.exists()) {
+    const data = snap.val();
+    document.getElementById("profileName").value = data.name || myId;
+    document.getElementById("profileAbout").value = data.about || "Available";
+    document.getElementById("profileAvatar").innerText = (data.name || myId)[0].toUpperCase();
   }
 }
 
-window.saveProfile = async ()=>{
-  const name = document.getElementById("profileName").value;
-  await update(ref(db, "users/"+myId), {name: name, about: document.getElementById("profileAbout").value});
-  const chatsSnap = await get(ref(db, "users/"+myId+"/chats"));
-  chatsSnap.forEach(child=>{update(ref(db, "users/"+child.val().id+"/chats/"+myId), {name: name})});
+window.saveProfile = async () => {
+  const name = document.getElementById("profileName").value.trim();
+  await update(ref(db, "users/" + myId), {name: name, about: document.getElementById("profileAbout").value});
+  const chatsSnap = await get(ref(db, "users/" + myId + "/chats"));
+  chatsSnap.forEach(child=>{update(ref(db, "users/" + child.val().id + "/chats/" + myId), {name: name})});
   alert("Profile Saved");
-  loadProfile();
+  await loadProfile();
   backHome();
-}
+};
 
-function loadChats(){
+// ========================= CHAT LIST =========================
+function loadChats() {
   onValue(ref(db, "users/" + myId + "/chats"), snap => {
     const list = document.getElementById("chatList"); list.innerHTML = "";
     snap.forEach(child => {
@@ -224,15 +318,18 @@ function loadChats(){
   });
 }
 
-window.startNew = async ()=>{
+// ========================= NEW CHAT =========================
+window.startNew = async () => {
   const fid = document.getElementById("newId").value.trim();
-  if(!fid) return alert("Enter ID");
-  const snap = await get(ref(db, "users/"+fid));
+  if (!fid) return alert("Enter ID");
+  if (fid === myId) return alert("You cannot chat with yourself");
+  const snap = await get(ref(db, "users/" + fid));
   const name = snap.exists()? snap.val().name : fid;
   openChat(fid, name);
-}
+};
 
-function openChat(fid, name){
+// ========================= OPEN CHAT =========================
+function openChat(fid, name) {
   currentFriendId = fid;
   currentChat = [myId, fid].sort().join("_");
   show("chatScreen");
@@ -259,7 +356,8 @@ function openChat(fid, name){
   });
 }
 
-function renderMessage(msgId, m){
+// ========================= RENDER MESSAGE =========================
+function renderMessage(msgId, m) {
   const d = document.createElement('div');
   d.className = m.sender === myId? 'text-right msg-wrap' : 'text-left msg-wrap';
   d.id = 'msg-' + msgId;
@@ -302,29 +400,48 @@ window.deleteForMe = async (msgId) => {
   hideMenu();
 }
 
+// ========================= SEND MESSAGE =========================
 window.send = ()=>{
-  const t = document.getElementById('msg').value;
-  if(t){ push(ref(db, 'chats/'+currentChat), {sender:myId, text:t, type:'text'}); document.getElementById('msg').value = '';}
+  const input = document.getElementById('msg');
+  const t = input.value.trim();
+  if(!t) return;
+  push(ref(db, 'chats/'+currentChat), {sender:myId, text:t, type:'text', time: Date.now()});
+  input.value = '';
 }
 
-window.sendFile = (e)=>{
+document.getElementById("msg").addEventListener("keydown", e => {
+  if (e.key === "Enter" &&!e.shiftKey) {
+    e.preventDefault();
+    window.send();
+  }
+});
+
+// ========================= FILE =========================
+window.sendFile = e => {
   const file = e.target.files[0];
+  if (!file) return;
   const reader = new FileReader();
   reader.onload = function(event){
-    push(ref(db, 'chats/'+currentChat), {sender: myId, type: 'image', url: event.target.result});
+    push(ref(db, 'chats/'+currentChat), {sender: myId, type: 'image', url: event.target.result, time: Date.now()});
   }
   reader.readAsDataURL(file);
 }
 
+// ========================= VOICE MESSAGE =========================
 window.startRecord = async ()=>{
-  document.getElementById('voiceBtn').classList.add('recording');
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  mediaRecorder = new MediaRecorder(stream);
-  audioChunks = [];
-  mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-  mediaRecorder.start();
+  try {
+    document.getElementById('voiceBtn').classList.add('recording');
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.start();
+  } catch (error) {
+    alert("Microphone permission is required.");
+  }
 }
 window.stopRecord = ()=>{
+  if (!mediaRecorder) return;
   document.getElementById('voiceBtn').classList.remove('recording');
   mediaRecorder.stop();
   mediaRecorder.onstop = () => {
@@ -332,15 +449,16 @@ window.stopRecord = ()=>{
     const reader = new FileReader();
     reader.readAsDataURL(blob);
     reader.onloadend = () => {
-      push(ref(db, 'chats/'+currentChat), {sender: myId, type: 'audio', url: reader.result});
+      push(ref(db, 'chats/'+currentChat), {sender: myId, type: 'audio', url: reader.result, time: Date.now()});
     }
   }
 }
 
+// ========================= STATUS =========================
 window.createStatus = ()=>{
   const status = prompt("Enter your status:");
-  if(status) set(ref(db, "status/"+myId), {text: status, time: Date.now(), name: document.getElementById("profileName").value});
-  loadStatuses();
+  if(!status) return;
+  set(ref(db, "status/"+myId), {text: status, time: Date.now(), name: document.getElementById("profileName").value});
 }
 
 function loadStatuses(){
@@ -353,7 +471,7 @@ function loadStatuses(){
   });
 }
 
-// ===== PWA INSTALL CODE =====
+// ========================= PWA INSTALL =========================
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
@@ -362,14 +480,12 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 window.installApp = async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    document.getElementById('installBtn').classList.add('hidden');
-  }
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('installBtn').classList.add('hidden');
 };
-// ===== END PWA CODE =====
 
 </script>
 </body>
