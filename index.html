@@ -13,6 +13,11 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 .back{font-size:24px;cursor:pointer;margin-right:15px}
 .screen{flex:1;overflow-y:auto;display:flex;flex-direction:column}
 
+/* AUTH */
+.authBox{margin:auto;text-align:center;padding:40px 20px;width:100%;max-width:400px}
+.authBox input{width:100%;padding:14px;background:#121A22;border:1px solid #263442;border-radius:8px;color:#fff;margin-bottom:15px}
+.authBtn{width:100%;padding:14px;background:#00BFA6;border:none;border-radius:8px;color:#000;font-weight:bold}
+
 /* CHAT LIST */
 #chatList{flex:1}
 .chatItem{display:flex;align-items:center;padding:15px;border-bottom:1px solid #1E2A36;cursor:pointer}
@@ -46,8 +51,19 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 </head>
 <body>
 
+<!-- AUTH SCREEN -->
+<div id="authScreen" class="screen">
+  <div class="authBox">
+    <h1 style="color:#00BFA6;font-size:32px;margin-bottom:10px">LinkUp</h1>
+    <p style="color:#8A9BA8;margin-bottom:30px">Enter your LinkUp ID or leave blank for new ID</p>
+    <input id="authIdInput" type="text" placeholder="LNK-123456">
+    <button class="authBtn" onclick="joinApp()">Join LinkUp</button>
+    <p id="myAuthId" style="color:#8A9BA8;font-size:12px;margin-top:20px"></p>
+  </div>
+</div>
+
 <!-- CHATS SCREEN -->
-<div id="chatsScreen" class="screen">
+<div id="chatsScreen" class="screen hidden">
   <div class="header"><h1>LinkUp</h1><div id="myId" style="font-size:12px;color:#8A9BA8"></div></div>
   <div id="chatList"></div>
   <button class="fab" onclick="showNewChat()">+</button>
@@ -88,16 +104,31 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let myId = localStorage.getItem('linkupId') || "LNK-" + Math.floor(100000 + Math.random() * 900000);
-localStorage.setItem('linkupId', myId);
+let myId = "";
 let currentChat = "";
 let typingTimeout;
 
-document.getElementById('myId').innerText = myId;
-set(ref(db, 'users/' + myId), { online: true, lastSeen: Date.now() });
-window.addEventListener('beforeunload', ()=> set(ref(db, 'users/' + myId + '/online'), false));
+// CHECK IF ALREADY LOGGED IN
+if(localStorage.getItem('linkupId')){
+  myId = localStorage.getItem('linkupId');
+  showApp();
+}
 
-loadChats();
+window.joinApp = () => {
+  const inputId = document.getElementById('authIdInput').value.toUpperCase();
+  myId = inputId && inputId.startsWith("LNK-") ? inputId : "LNK-" + Math.floor(100000 + Math.random() * 900000);
+  localStorage.setItem('linkupId', myId);
+  showApp();
+}
+
+function showApp(){
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('chatsScreen').classList.remove('hidden');
+  document.getElementById('myId').innerText = myId;
+  document.getElementById('myAuthId').innerText = "Your ID: " + myId;
+  set(ref(db, 'users/' + myId), { online: true, lastSeen: Date.now() });
+  loadChats();
+}
 
 window.showNewChat = () => document.getElementById('newChatPopup').classList.remove('hidden');
 window.hideNewChat = () => document.getElementById('newChatPopup').classList.add('hidden');
@@ -119,7 +150,6 @@ window.startChat = () => {
 window.backToChats = () => {
   document.getElementById('chatScreen').classList.add('hidden');
   document.getElementById('chatsScreen').classList.remove('hidden');
-  loadChats();
 }
 
 window.sendMsg = () => {
@@ -167,14 +197,12 @@ function loadChats() {
       list.innerHTML = `<div class="empty">💬<br>No chats yet<br>Tap + to start</div>`;
       return;
     }
-    
-    Object.keys(chats).sort((a,b)=> chats[b].lastTime - chats[a].lastTime).forEach(fid => {
+    Object.keys(chats).forEach(fid => {
       const chatId = [myId, fid].sort().join('_');
       onValue(ref(db, 'chats/' + chatId), msgSnap => {
         const msgs = msgSnap.val();
         const lastMsg = msgs ? Object.values(msgs).pop() : {text:"No messages yet"};
         const time = chats[fid].lastTime ? new Date(chats[fid].lastTime).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : "";
-        
         const div = document.createElement('div');
         div.className = 'chatItem';
         div.onclick = () => { document.getElementById('friendIdInput').value = fid; startChat(); }
@@ -191,6 +219,8 @@ function loadChats() {
     });
   });
 }
+
+window.addEventListener('beforeunload', ()=> set(ref(db, 'users/' + myId + '/online'), false));
 </script>
 </body>
 </html>
