@@ -5,195 +5,274 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LinkUp</title>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
-body { background: #0a1628; color: #fff; }
-.container { max-width: 600px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; }
-.login { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 20px; gap: 15px; text-align: center; }
-.login h1 { color: #00d4ff; font-size: 40px; }
-.id-box { background: #1e3a5f; padding: 20px; border-radius: 12px; width: 100%; }
-.id-box h2 { color: #00d4ff; font-size: 28px; margin: 10px 0; word-break: break-all; }
-.copy-btn { background: #1e3a5f; border: 1px solid #00d4ff; color: #00d4ff; padding: 8px; border-radius: 8px; width: 100%; margin-top: 10px; cursor: pointer; }
-.btn { background: #00d4ff; color: #0a1628; border: none; padding: 14px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; font-size: 16px; }
-.btn.small { width: 25%; padding: 10px; }
-.btn.send { width: 80px; }
-.btn:active { transform: scale(0.95); }
-.header { background: #0f2742; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-.header button { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
-.chat-list, .chat-screen { display: none; flex: 1; flex-direction: column; }
-.add-row { display: flex; padding: 10px; gap: 8px; }
-.add-row input { flex: 1; padding: 10px; background: #1e3a5f; border: none; color: white; border-radius: 10px; outline: none; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+body { background: #0a1628; color: white; }
+.container { width: 100%; max-width: 600px; height: 100vh; margin: auto; display: flex; flex-direction: column; }
+.login { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; gap: 15px; text-align: center; }
+.login h1 { color: #00d4ff; font-size: 42px; }
+.id-box { background: #1e3a5f; padding: 20px; border-radius: 15px; width: 100%; }
+.id-box h2 { color: #00d4ff; font-size: 27px; margin: 12px 0; word-break: break-all; }
+.copy-btn { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #00d4ff; background: transparent; color: #00d4ff; cursor: pointer; }
+.btn { background: #00d4ff; color: #06111f; border: none; padding: 13px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; }
+.btn.small { width: 80px; }
+.btn.send { width: 75px; }
+button:active { transform: scale(.96); }
+.header { background: #0f2742; padding: 15px; display: flex; align-items: center; justify-content: space-between; }
+.chat-list, .chat-screen { display: none; flex: 1; flex-direction: column; min-height: 0; }
+.add-row { display: flex; gap: 8px; padding: 10px; }
+.add-row input { flex: 1; padding: 12px; border: none; outline: none; border-radius: 10px; background: #1e3a5f; color: white; }
+#chats { overflow-y: auto; }
+.chat-item { display: flex; align-items: center; gap: 12px; padding: 15px; border-bottom: 1px solid #173654; cursor: pointer; }
+.chat-item:hover { background: #102b48; }
+.avatar { width: 45px; height: 45px; border-radius: 50%; background: #00d4ff; color: #071524; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+.chat-info { flex: 1; min-width: 0; }
+.chat-name { font-weight: bold; }
+.last-message { color: #9fb5c9; font-size: 13px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.online-dot { width: 9px; height: 9px; border-radius: 50%; background: #555; }
+.online-dot.online { background: #00ff88; }
 .messages { flex: 1; overflow-y: auto; padding: 15px; background: #0a1628; }
-.msg { background: #1e3a5f; padding: 10px 14px; margin: 8px 0; border-radius: 12px; max-width: 75%; word-wrap: break-word; }
-.msg.me { background: #00d4ff; color: #0a1628; margin-left: auto; }
-.input-area { display: flex; padding: 10px; background: #0f2742; gap: 8px; align-items: center; }
-.input-area input { flex: 1; padding: 12px; border: none; border-radius: 20px; background: #1e3a5f; color: white; outline: none; }
-.mic-btn { background: #00d4ff; border: none; width: 45px; height: 45px; border-radius: 50%; color: #0a1628; font-size: 20px; }
-.mic-btn.recording { background: red; }
-.call-btn { background: none; border: none; color: #00d4ff; font-size: 22px; }
+.msg { background: #1e3a5f; padding: 10px 13px; margin: 7px 0; border-radius: 13px; max-width: 78%; word-wrap: break-word; }
+.msg.me { background: #00d4ff; color: #06111f; margin-left: auto; }
+.msg-name { font-size: 11px; opacity: .7; margin-bottom: 4px; }
+.msg-time { font-size: 10px; opacity: .65; text-align: right; margin-top: 4px; }
+.input-area { display: flex; align-items: center; gap: 7px; padding: 10px; background: #0f2742; }
+.input-area input { flex: 1; padding: 13px; border: none; outline: none; border-radius: 22px; background: #1e3a5f; color: white; }
+.mic-btn { width: 45px; height: 45px; border-radius: 50%; border: none; background: #00d4ff; color: #06111f; font-size: 19px; }
+.mic-btn.recording { background: red; color: white; }
+.call-btn, .back-btn { background: transparent; border: none; color: #00d4ff; font-size: 23px; }
+.typing { height: 20px; padding-left: 15px; color: #00d4ff; font-size: 12px; }
 audio { width: 200px; max-width: 100%; }
+.empty { text-align: center; color: #8298ad; padding: 30px; }
+.loading { position: fixed; inset: 0; background: #0a1628; display: flex; align-items: center; justify-content: center; z-index: 999; }
+.loading h2 { color: #00d4ff; }
 </style>
 </head>
 <body>
+<div class="loading" id="loading"><h2>Connecting to LinkUp...</h2></div>
 <div class="container">
-  <div class="login" id="login">
-    <h1>LinkUp</h1>
-    <p>Fast. Secure. No number needed</p>
-    <div class="id-box">
-      <p>Your LinkUp ID</p>
-      <h2 id="myId">Generating...</h2>
-      <button onclick="copyId()" class="copy-btn">Copy ID</button>
+    <div class="login" id="login">
+        <h1>LinkUp</h1>
+        <p>Fast. Secure. No phone number needed.</p>
+        <div class="id-box">
+            <p>Your LinkUp ID</p>
+            <h2 id="myId">Generating...</h2>
+            <button class="copy-btn" onclick="copyId()">Copy ID</button>
+        </div>
+        <button class="btn" onclick="startApp()">Start Chatting</button>
     </div>
-    <button class="btn" onclick="startApp()">Start Chatting</button>
-  </div>
 
-  <div class="chat-list" id="chatList">
-    <div class="header">
-      <h2 id="myHeaderId">Chats</h2>
+    <div class="chat-list" id="chatList">
+        <div class="header"><h2 id="myHeaderId">LinkUp</h2><span id="statusText">● Online</span></div>
+        <div class="add-row">
+            <input id="newChatId" type="text" placeholder="Enter friend's LinkUp ID">
+            <button class="btn small" onclick="newChat()">Add</button>
+        </div>
+        <div id="chats"></div>
     </div>
-    <div class="add-row">
-      <input type="text" id="newChatId" placeholder="Friend ID e.g LinkUp_1234">
-      <button class="btn small" onclick="newChat()">Add</button>
-    </div>
-    <div id="chats"></div>
-  </div>
 
-  <div class="chat-screen" id="chatScreen">
-    <div class="header">
-      <button onclick="backToList()">←</button>
-      <h3 id="chatWith"></h3>
-      <button class="call-btn" onclick="alert('Video call coming soon!')">📹</button>
+    <div class="chat-screen" id="chatScreen">
+        <div class="header">
+            <button class="back-btn" onclick="backToList()">←</button>
+            <div style="flex:1;margin-left:10px;"><h3 id="chatWith">Friend</h3><small id="friendStatus">Offline</small></div>
+            <button class="call-btn" onclick="alert('Video call coming soon')">📹</button>
+        </div>
+        <div class="messages" id="messages"></div>
+        <div class="typing" id="typingIndicator"></div>
+        <div class="input-area">
+            <input type="text" id="msgInput" placeholder="Message...">
+            <button class="mic-btn" id="micBtn">🎤</button>
+            <button class="btn send" onclick="sendMsg()">Send</button>
+        </div>
     </div>
-    <div class="messages" id="messages"></div>
-    <div class="input-area">
-      <input type="text" id="msgInput" placeholder="Message..." onkeypress="if(event.key==='Enter') sendMsg()">
-      <button class="mic-btn" id="micBtn">🎤</button>
-      <button class="btn send" onclick="sendMsg()">Send</button>
-    </div>
-  </div>
 </div>
 
 <script>
-// ====== 1. PASTE YOUR FIREBASE CONFIG HERE ======
+/* ====== FIREBASE CONFIG ====== */
 const firebaseConfig = {
-  apiKey: "PASTE_YOUR_API_KEY",
-  authDomain: "linkup-chat-3fdd5.firebaseapp.com",
-  databaseURL: "https://linkup-chat-3fdd5-default-rtdb.firebaseio.com",
-  projectId: "linkup-chat-3fdd5",
-  storageBucket: "linkup-chat-3fdd5.appspot.com"
+    apiKey: "PASTE_YOUR_API_KEY",
+    authDomain: "linkup-chat-3fdd5.firebaseapp.com",
+    databaseURL: "https://linkup-chat-3fdd5-default-rtdb.firebaseio.com",
+    projectId: "linkup-chat-3fdd5",
+    storageBucket: "linkup-chat-3fdd5.appspot.com",
+    messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
+    appId: "PASTE_YOUR_APP_ID"
 };
 firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 const db = firebase.database();
 const storage = firebase.storage();
 
-let myName = "";
-let currentChat = "";
-let recorder;
-let isRecording = false;
+let myName = "", currentFriend = "", currentChat = "";
+let recorder, isRecording = false;
 
-// ====== 2. AUTO GENERATE ID ======
-function generateId() {
-  let num = Math.floor(1000 + Math.random() * 9000);
-  return `LinkUp_${num}`;
+/* ====== INIT ====== */
+async function initializeApp() {
+    await auth.signInAnonymously();
+    myName = localStorage.getItem("linkupId") || "LinkUp_" + Math.floor(1000 + Math.random() * 9000);
+    localStorage.setItem("linkupId", myName);
+    await db.ref("users/" + myName).update({id: myName, uid: auth.currentUser.uid, online: false});
+    document.getElementById("myId").textContent = myName;
+    document.getElementById("myHeaderId").textContent = myName;
+    document.getElementById("loading").style.display = "none";
+    if(localStorage.getItem("linkupStarted") === "true") startApp();
 }
+initializeApp();
 
-if(localStorage.getItem('linkupId')) {
-  myName = localStorage.getItem('linkupId');
-} else {
-  myName = generateId();
-  localStorage.setItem('linkupId', myName);
-}
-document.getElementById('myId').innerText = myName;
-document.getElementById('myHeaderId').innerText = myName;
-
-function copyId() {
-  navigator.clipboard.writeText(myName);
-  alert("ID Copied: " + myName);
-}
-
-function startApp() {
-  db.ref('online/' + myName).set(true);
-  document.getElementById('login').style.display = 'none';
-  document.getElementById('chatList').style.display = 'flex';
-}
-
-function newChat() {
-  let friend = document.getElementById('newChatId').value.trim();
-  if(!friend) return alert("Enter friend ID");
-  currentChat = [myName, friend].sort().join('_');
-  openChat(friend);
-  document.getElementById('newChatId').value = '';
-}
-
-function openChat(friend) {
-  document.getElementById('chatList').style.display = 'none';
-  document.getElementById('chatScreen').style.display = 'flex';
-  document.getElementById('chatWith').innerText = friend;
-  
-  db.ref('chats/' + currentChat).on('value', snap => {
-    let html = '';
-    snap.forEach(child => {
-      let m = child.val();
-      if(m.type === 'voice') {
-        html += `<div class="msg ${m.from === myName ? 'me' : ''}">🎤 <audio controls src="${m.url}"></audio></div>`;
-      } else {
-        html += `<div class="msg ${m.from === myName ? 'me' : ''}"><b>${m.from}:</b> ${m.text}</div>`;
-      }
+/* ====== PRESENCE ====== */
+function setupPresence() {
+    const userRef = db.ref("users/" + myName);
+    db.ref(".info/connected").on("value", snap => {
+        if(snap.val()) {
+            userRef.update({online: true, lastSeen: firebase.database.ServerValue.TIMESTAMP});
+            userRef.onDisconnect().update({online: false, lastSeen: firebase.database.ServerValue.TIMESTAMP});
+        }
     });
-    document.getElementById('messages').innerHTML = html;
-    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-  });
 }
 
+/* ====== START APP ====== */
+function startApp() {
+    localStorage.setItem("linkupStarted", "true");
+    setupPresence();
+    document.getElementById("login").style.display = "none";
+    document.getElementById("chatList").style.display = "flex";
+    loadChatList();
+}
+
+/* ====== COPY ID ====== */
+function copyId() {
+    navigator.clipboard.writeText(myName);
+    alert("ID Copied: " + myName);
+}
+
+/* ====== CHAT ID ====== */
+function createChatId(u1, u2) { return [u1, u2].sort().join("__"); }
+
+/* ====== ADD FRIEND ====== */
+async function newChat() {
+    const friend = document.getElementById("newChatId").value.trim();
+    if(!friend) return alert("Enter friend ID");
+    if(friend === myName) return alert("You cannot chat with yourself");
+    const userSnap = await db.ref("users/" + friend).once("value");
+    if(!userSnap.exists()) return alert("This ID does not exist");
+    const chatId = createChatId(myName, friend);
+    const updates = {};
+    updates["userChats/" + myName + "/" + chatId] = {friend: friend, updatedAt: Date.now()};
+    updates["userChats/" + friend + "/" + chatId] = {friend: myName, updatedAt: Date.now()};
+    await db.ref().update(updates);
+    document.getElementById("newChatId").value = "";
+    openChat(friend);
+}
+
+/* ====== LOAD CHAT LIST ====== */
+function loadChatList() {
+    db.ref("userChats/" + myName).on("value", snap => {
+        const chats = document.getElementById("chats");
+        chats.innerHTML = "";
+        if(!snap.exists()) {
+            chats.innerHTML = '<div class="empty">No chats yet.<br><br>Enter a friend\'s LinkUp ID above.</div>';
+            return;
+        }
+        snap.forEach(child => {
+            const data = child.val();
+            const div = document.createElement("div");
+            div.className = "chat-item";
+            div.innerHTML = `<div class="avatar">${data.friend.substring(7,9)}</div>
+            <div class="chat-info"><div class="chat-name">${data.friend}</div><div class="last-message">${data.lastMessage || "Start chatting"}</div></div>
+            <div class="online-dot" id="dot_${data.friend}"></div>`;
+            div.onclick = () => openChat(data.friend);
+            chats.appendChild(div);
+            db.ref("users/" + data.friend + "/online").on("value", s => {
+                document.getElementById("dot_" + data.friend).classList.toggle("online", s.val() === true);
+            });
+        });
+    });
+}
+
+/* ====== OPEN CHAT ====== */
+function openChat(friend) {
+    currentFriend = friend;
+    currentChat = createChatId(myName, friend);
+    document.getElementById("chatList").style.display = "none";
+    document.getElementById("chatScreen").style.display = "flex";
+    document.getElementById("chatWith").textContent = friend;
+    db.ref("users/" + friend + "/online").on("value", s => {
+        document.getElementById("friendStatus").textContent = s.val() ? "Online" : "Offline";
+    });
+    listenToMessages();
+}
+
+/* ====== SEND MESSAGE ====== */
 function sendMsg() {
-  let text = document.getElementById('msgInput').value.trim();
-  if(!text) return;
-  db.ref('chats/' + currentChat).push({from: myName, text: text, type: 'text', time: Date.now()});
-  document.getElementById('msgInput').value = '';
+    const text = document.getElementById("msgInput").value.trim();
+    if(!text) return;
+    const msg = {from: myName, text: text, type: "text", time: Date.now()};
+    db.ref("messages/" + currentChat).push(msg);
+    db.ref("userChats/" + myName + "/" + currentChat).update({lastMessage: text, updatedAt: Date.now()});
+    db.ref("userChats/" + currentFriend + "/" + currentChat).update({lastMessage: text, updatedAt: Date.now()});
+    document.getElementById("msgInput").value = "";
 }
 
-// ====== 3. VOICE NOTE WITH FIREBASE STORAGE ======
-const micBtn = document.getElementById('micBtn');
-micBtn.onmousedown = startRecord;
-micBtn.onmouseup = stopRecord;
-micBtn.ontouchstart = startRecord;
-micBtn.ontouchend = stopRecord;
+/* ====== LISTEN MESSAGES ====== */
+function listenToMessages() {
+    db.ref("messages/" + currentChat).off();
+    db.ref("messages/" + currentChat).on("value", snap => {
+        const container = document.getElementById("messages");
+        container.innerHTML = "";
+        snap.forEach(child => {
+            const m = child.val();
+            const div = document.createElement("div");
+            div.className = "msg " + (m.from === myName ? "me" : "");
+            let content = m.type === "voice" ? `<audio controls src="${m.url}"></audio>` : m.text;
+            div.innerHTML = `<div class="msg-name">${m.from}</div>${content}<div class="msg-time">${new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>`;
+            container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+    });
+}
+
+/* ====== VOICE NOTE ====== */
+const micBtn = document.getElementById("micBtn");
+micBtn.onmousedown = micBtn.ontouchstart = startRecord;
+micBtn.onmouseup = micBtn.ontouchend = stopRecord;
 
 function startRecord() {
-  if(isRecording) return;
-  isRecording = true;
-  micBtn.classList.add('recording');
-  navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
-    recorder = new MediaRecorder(stream);
-    let chunks = [];
-    recorder.ondataavailable = e => chunks.push(e.data);
-    recorder.onstop = () => {
-      let blob = new Blob(chunks, {type: 'audio/webm'});
-      let fileName = `voice/${currentChat}/${Date.now()}.webm`;
-      let uploadTask = storage.ref(fileName).put(blob);
-      uploadTask.then(snapshot => {
-        snapshot.ref.getDownloadURL().then(url => {
-          db.ref('chats/' + currentChat).push({from: myName, type: 'voice', url: url, time: Date.now()});
-        });
-      });
-    };
-    recorder.start();
-  });
+    if(isRecording) return;
+    isRecording = true;
+    micBtn.classList.add("recording");
+    navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
+        recorder = new MediaRecorder(stream);
+        let chunks = [];
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = () => {
+            let blob = new Blob(chunks, {type: 'audio/webm'});
+            let fileName = `voice/${currentChat}/${Date.now()}.webm`;
+            storage.ref(fileName).put(blob).then(snap => {
+                snap.ref.getDownloadURL().then(url => {
+                    const msg = {from: myName, type: "voice", url: url, time: Date.now()};
+                    db.ref("messages/" + currentChat).push(msg);
+                });
+            });
+        };
+        recorder.start();
+    });
 }
 
 function stopRecord() {
-  if(!isRecording) return;
-  isRecording = false;
-  micBtn.classList.remove('recording');
-  if(recorder) recorder.stop();
+    if(!isRecording) return;
+    isRecording = false;
+    micBtn.classList.remove("recording");
+    if(recorder) recorder.stop();
 }
 
+/* ====== BACK ====== */
 function backToList() {
-  db.ref('chats/' + currentChat).off();
-  document.getElementById('chatScreen').style.display = 'none';
-  document.getElementById('chatList').style.display = 'flex';
+    db.ref("messages/" + currentChat).off();
+    document.getElementById("chatScreen").style.display = "none";
+    document.getElementById("chatList").style.display = "flex";
 }
 </script>
 </body>
