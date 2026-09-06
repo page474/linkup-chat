@@ -20,7 +20,7 @@ body { background: #111b21; color: white; font-family: Arial; }
 .chat-img { max-width: 260px; border-radius: 8px; }
 .avatar { background: linear-gradient(135deg,#7c3aed,#2563eb); }
 .recording { animation: pulse 1s infinite; }
-@keyframes pulse { 50% { transform: scale(1.1); }
+@keyframes pulse { 50% { transform: scale(1.1); } }
 .chat-area { background-color: #0b141a; background-image: radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px); background-size: 20px 20px; }
 .empty-state { text-align: center; color: #8696a0; margin-top: 40%; }
 .msg-wrap { position: relative; }
@@ -38,7 +38,7 @@ body { background: #111b21; color: white; font-family: Arial; }
       <p id="myIdSmall" class="text-xs text-gray-400"></p>
     </div>
     <div class="flex gap-2">
-      <!-- INSTALL BUTTON ADDED HERE -->
+      <!-- INSTALL BUTTON -->
       <button onclick="installApp()" id="installBtn" class="hidden bg-[#00a884] px-3 py-1 rounded-full text-sm font-bold">Install</button>
       <button onclick="openProfile()"><i data-lucide="settings" class="w-6 h-6"></i></button>
     </div>
@@ -55,7 +55,8 @@ body { background: #111b21; color: white; font-family: Arial; }
 
   <div id="chatList" class="flex-1 overflow-y-auto"></div>
 
-  <nav class="topbar grid-cols-3 py-2 text-center border-t border-[#344047]">
+  <!-- FIXED NAV - NOW HORIZONTAL -->
+  <nav class="topbar grid grid-cols-3 py-2 text-center border-t border-[#344047]">
     <button onclick="showHome()" id="navChats" class="flex flex-col items-center text-[#00a884]">
       <i data-lucide="message-circle" class="w-6 h-6"></i><span class="text-xs">Chats</span>
     </button>
@@ -372,4 +373,4 @@ window.installApp = async () => {
 
 </script>
 </body>
-  </html>
+</html>
