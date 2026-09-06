@@ -10,7 +10,7 @@
     .hidden { display: none !important; }
     
     .header { background: #121A22; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
-    .header h1 { font-size: 22px; color: #00BFA6; }
+    .header h1 { font-size: 20px; color: #00BFA6; }
     .header .back { font-size: 24px; cursor: pointer; }
     
     .setting-item { display: flex; align-items: center; padding: 14px 20px; background: #121A22; border-bottom: 1px solid #1E2A36; cursor: pointer; }
@@ -29,6 +29,10 @@
     input:checked + .slider { background-color: #00BFA6; }
     input:checked + .slider:before { transform: translateX(24px); }
     
+    /* EMPTY STATE */
+    .emptyState { text-align: center; padding: 60px 20px; color: #8A9BA8; }
+    .emptyState svg { width: 80px; height: 80px; fill: #2A3038; margin-bottom: 20px; }
+    
     .profileCard { background: #121A22; padding: 20px; display: flex; align-items: center; border-bottom: 1px solid #1E2A36; }
     .profileCard .avatar { width: 60px; height: 60px; background: #00BFA6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #000; margin-right: 15px; }
     
@@ -38,8 +42,9 @@
     .navItem svg { width: 24px; height: 24px; fill: #8A9BA8; margin-bottom: 4px; }
     .navItem.active svg { fill: #00BFA6; }
     
-    .c1{background:#8B5CF6}.c2{background:#3B82F6}.c3{background:#00BFA6}.c4{background:#10B981}
-    .c5{background:#EF4444}.c6{background:#F59E0B}.c7{background:#6366F1}.c8{background:#EC4899}
+    /* COLORS LIKE YOUR SCREENSHOT */
+    .c1{background:#00C896}.c2{background:#3B82F6}.c3{background:#00BFA6}.c4{background:#EF4444}
+    .c5{background:#8B5CF6}.c6{background:#F59E0B}
   </style>
 </head>
 <body>
@@ -55,10 +60,8 @@
     <div class="profileCard">
       <div class="avatar">L</div>
       <div><div style="font-size:18px; font-weight:bold;" id="myId">LNK-813878</div><div style="color:#8A9BA8; font-size:14px;">Your LinkUp ID</div></div>
-      <div style="margin-left:auto;"><svg width="24" height="24" fill="#00BFA6"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></div>
     </div>
     <div class="setting-item" onclick="showScreen('privacyScreen')"><div class="icon c4"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div><div class="setting-text"><div class="title">Privacy & Security</div></div></div>
-    <div class="setting-item"><div class="icon c5"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div><div class="setting-text"><div class="title">Notifications</div></div></div>
     <div style="text-align:center; color:#8A9BA8; padding:20px; font-size:12px;">Version 1.0.0</div>
   </div>
 
@@ -66,35 +69,26 @@
   <div id="privacyScreen" class="hidden">
     <div class="header"><div class="back" onclick="showScreen('settingsScreen')">←</div><h1>Privacy & Security</h1></div>
     
-    <div class="setting-item">
-      <div class="icon c4"><svg viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z"/></svg></div>
-      <div class="setting-text"><div class="title">Last Seen & Online</div><div class="sub">Nobody</div></div>
-    </div>
+    <div class="setting-item"><div class="icon c1"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm-1 14h2v-2h-2v2zm0-4h2V7h-2v6z"/></svg></div><div class="setting-text"><div class="title">Last Seen & Online</div><div class="sub">Nobody</div></div></div>
     
-    <div class="setting-item">
-      <div class="icon c2"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
-      <div class="setting-text"><div class="title">Profile Photo</div><div class="sub">My Contacts</div></div>
-    </div>
+    <div class="setting-item"><div class="icon c2"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="setting-text"><div class="title">Profile Photo</div><div class="sub">My Contacts</div></div></div>
     
-    <div class="setting-item">
-      <div class="icon c3"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>
-      <div class="setting-text"><div class="title">About</div><div class="sub">Everyone</div></div>
-    </div>
+    <div class="setting-item"><div class="icon c3"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div><div class="setting-text"><div class="title">About</div><div class="sub">Everyone</div></div></div>
     
-    <div class="setting-item">
-      <div class="icon c5"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/></svg></div>
-      <div class="setting-text"><div class="title">Blocked Users</div><div class="sub">0 users</div></div>
-    </div>
+    <div class="setting-item" onclick="showScreen('blockedScreen')"><div class="icon c4"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/></svg></div><div class="setting-text"><div class="title">Blocked Users</div><div class="sub">0 users</div></div></div>
     
-    <div class="setting-item">
-      <div class="icon c1"><svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg></div>
-      <div class="setting-text"><div class="title">Read Receipts</div><div class="sub">Send and receive</div></div>
-      <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-    </div>
+    <div class="setting-item"><div class="icon c5"><svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg></div><div class="setting-text"><div class="title">Read Receipts</div><div class="sub">Send and receive</div></div><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
     
-    <div class="setting-item">
-      <div class="icon c6"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div>
-      <div class="setting-text"><div class="title">Two-Step Verification</div><div class="sub">Off</div></div>
+    <div class="setting-item"><div class="icon c6"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg></div><div class="setting-text"><div class="title">Two-Step Verification</div><div class="sub">Off</div></div></div>
+  </div>
+
+  <!-- BLOCKED USERS SCREEN -->
+  <div id="blockedScreen" class="hidden">
+    <div class="header"><div class="back" onclick="showScreen('privacyScreen')">←</div><h1>Blocked Users</h1></div>
+    <div class="emptyState">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm7 10c0 4.52-2.98 8.69-7 9.93-4.02-1.24-7-5.41-7-9.93V6.3l7-3 7 3V11z"/></svg>
+      <h3>No Blocked Users</h3>
+      <p>Users you block will appear here</p>
     </div>
   </div>
 
@@ -108,9 +102,7 @@
 
   <script>
     function showScreen(id) {
-      document.getElementById('chatsScreen').classList.add('hidden');
-      document.getElementById('settingsScreen').classList.add('hidden');
-      document.getElementById('privacyScreen').classList.add('hidden');
+      document.querySelectorAll('#chatsScreen,#settingsScreen,#privacyScreen,#blockedScreen').forEach(e=>e.classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
       document.querySelectorAll('.navItem').forEach(e=>e.classList.remove('active'));
     }
