@@ -16,13 +16,25 @@ body { background: #111b21; color: white; font-family: Arial; }
 .avatar { background: linear-gradient(135deg,#7c3aed,#2563eb); }
 .recording { animation: pulse 1s infinite; }
 @keyframes pulse { 50% { transform: scale(1.1); } }
+
+.chat-area {
+  background-color: #0b141a;
+  background-image: 
+    radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.empty-state {
+  text-align: center;
+  color: #8696a0;
+  margin-top: 40%;
+}
 </style>
 </head>
 <body>
 <div class="app">
 
-<!-- HOME SCREEN -->
-<section id="homeScreen" class="h-full flex-col">
+<section id="homeScreen" class="h-full flex flex-col">
   <header class="topbar p-4 flex justify-between items-center">
     <div>
       <h1 class="text-2xl font-bold">LinkUp</h1>
@@ -44,49 +56,48 @@ body { background: #111b21; color: white; font-family: Arial; }
 
   <nav class="topbar grid grid-cols-3 py-2 text-center border-t border-[#344047]">
     <button onclick="showHome()" id="navChats" class="flex flex-col items-center text-[#00a884]">
-      <i data-lucide="message-circle" class="w-6 h-6"></i>
-      <span class="text-xs">Chats</span>
+      <i data-lucide="message-circle" class="w-6 h-6"></i><span class="text-xs">Chats</span>
     </button>
     <button onclick="showStatus()" id="navStatus" class="flex flex-col items-center text-gray-400">
-      <i data-lucide="circle" class="w-6 h-6"></i>
-      <span class="text-xs">Status</span>
+      <i data-lucide="circle" class="w-6 h-6"></i><span class="text-xs">Status</span>
     </button>
     <button onclick="openProfile()" id="navProfile" class="flex flex-col items-center text-gray-400">
-      <i data-lucide="user" class="w-6 h-6"></i>
-      <span class="text-xs">Profile</span>
+      <i data-lucide="user" class="w-6 h-6"></i><span class="text-xs">Profile</span>
     </button>
   </nav>
 </section>
 
-<!-- CHAT SCREEN -->
-<section id="chatScreen" class="hidden h-full flex-col">
+<section id="chatScreen" class="hidden h-full flex flex-col"> <!-- ADDED flex -->
   <header class="topbar p-3 flex items-center gap-3">
     <button onclick="backHome()"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
     <div id="chatAvatar" class="avatar w-11 h-11 rounded-full flex items-center justify-center font-bold">A</div>
-    <p id="chatWith" class="font-bold flex-1"></p>
+    <div class="flex-1">
+      <p id="chatWith" class="font-bold"></p>
+      <p id="chatIdSmall" class="text-xs text-gray-400"></p>
+    </div>
   </header>
 
-  <main id="msgs" class="flex-1 overflow-y-auto p-3 space-y-2"></main>
+  <main id="msgs" class="chat-area flex-1 overflow-y-auto p-3 space-y-2">
+    <div class="empty-state">
+      <i data-lucide="message-circle" class="w-16 h-16 mx-auto opacity-20"></i>
+      <p class="mt-4">No messages yet</p>
+      <p class="text-sm">Send a message to start chatting</p>
+    </div>
+  </main>
 
-  <div class="topbar p-2">
+  <!-- THIS ONE NOW GO STAY FOR DOWN -->
+  <div class="topbar p-2 mt-auto"> <!-- ADDED mt-auto -->
     <div class="flex gap-2 items-center">
       <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,.pdf,.doc,.zip" onchange="sendFile(event)">
-      <button onclick="document.getElementById('fileInput').click()">
-        <i data-lucide="paperclip" class="w-6 h-6"></i>
-      </button>
+      <button onclick="document.getElementById('fileInput').click()"><i data-lucide="paperclip" class="w-6 h-6"></i></button>
       <input id="msg" placeholder="Message" class="flex-1 bg-[#2a3942] rounded-full px-4 py-3">
-      <button id="voiceBtn" onmousedown="startRecord()" onmouseup="stopRecord()">
-        <i data-lucide="mic" class="w-6 h-6"></i>
-      </button>
-      <button onclick="send()" class="bg-[#00a884] w-11 h-11 rounded-full flex items-center justify-center">
-        <i data-lucide="send" class="w-5 h-5"></i>
-      </button>
+      <button id="voiceBtn" onmousedown="startRecord()" onmouseup="stopRecord()"><i data-lucide="mic" class="w-6 h-6"></i></button>
+      <button onclick="send()" class="bg-[#00a884] w-11 h-11 rounded-full flex items-center justify-center"><i data-lucide="send" class="w-5 h-5"></i></button>
     </div>
   </div>
 </section>
 
-<!-- PROFILE SCREEN -->
-<section id="profileScreen" class="hidden h-full flex-col">
+<section id="profileScreen" class="hidden h-full flex flex-col">
   <header class="topbar p-4 flex items-center gap-3">
     <button onclick="backHome()"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
     <h2 class="text-xl font-bold">Profile</h2>
@@ -103,8 +114,7 @@ body { background: #111b21; color: white; font-family: Arial; }
   </div>
 </section>
 
-<!-- STATUS SCREEN -->
-<section id="statusScreen" class="hidden h-full flex-col">
+<section id="statusScreen" class="hidden h-full flex flex-col">
   <header class="topbar p-4 flex items-center gap-3">
     <button onclick="backHome()"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
     <h2 class="text-xl font-bold">Status</h2>
@@ -123,7 +133,7 @@ body { background: #111b21; color: white; font-family: Arial; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, push, onChildAdded, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, push, onChildAdded, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -141,7 +151,7 @@ let myId = "";
 let currentChat = "";
 let mediaRecorder, audioChunks = [];
 
-lucide.createIcons(); // LOAD ICONS
+lucide.createIcons();
 
 signInAnonymously(auth);
 onAuthStateChanged(auth, async user => {
@@ -149,24 +159,25 @@ onAuthStateChanged(auth, async user => {
   myId = "LinkUp_" + user.uid.substring(0, 8).toUpperCase();
   document.getElementById("myIdSmall").innerText = myId;
   document.getElementById("profileId").innerText = myId;
+  await createUser();
   loadChats();
   loadProfile();
   loadStatuses();
 });
 
+async function createUser(){
+  const snap = await get(ref(db, "users/"+myId));
+  if(!snap.exists()){
+    await set(ref(db, "users/"+myId), {id: myId, name: myId, about: "Available on LinkUp"});
+  }
+}
+
 function show(s){ 
   ["homeScreen","chatScreen","profileScreen","statusScreen"].forEach(id=>document.getElementById(id).classList.add("hidden")); 
   document.getElementById(s).classList.remove("hidden"); 
-  lucide.createIcons(); // refresh icons
-  
-  // active nav color
-  document.getElementById("navChats").classList.remove("text-[#00a884]");
-  document.getElementById("navStatus").classList.remove("text-[#00a884]");
-  document.getElementById("navProfile").classList.remove("text-[#00a884]");
-  document.getElementById("navChats").classList.add("text-gray-400");
-  document.getElementById("navStatus").classList.add("text-gray-400");
-  document.getElementById("navProfile").classList.add("text-gray-400");
-  
+  document.getElementById(s).classList.add("flex");
+  lucide.createIcons();
+  document.querySelectorAll("nav button").forEach(b=>{b.classList.add("text-gray-400"); b.classList.remove("text-[#00a884]")});
   if(s==="homeScreen") document.getElementById("navChats").classList.add("text-[#00a884]");
   if(s==="statusScreen") document.getElementById("navStatus").classList.add("text-[#00a884]");
   if(s==="profileScreen") document.getElementById("navProfile").classList.add("text-[#00a884]");
@@ -182,15 +193,17 @@ async function loadProfile(){
   if(snap.exists()){
     document.getElementById("profileName").value = snap.val().name || myId;
     document.getElementById("profileAbout").value = snap.val().about || "Available";
-    document.getElementById("profileAvatar").innerText = (snap.val().name||myId)[0];
+    document.getElementById("profileAvatar").innerText = (snap.val().name||myId)[0].toUpperCase();
   }
 }
-window.saveProfile = ()=>{
-  set(ref(db, "users/"+myId), {
-    id: myId, name: document.getElementById("profileName").value,
-    about: document.getElementById("profileAbout").value
-  });
+
+window.saveProfile = async ()=>{
+  const name = document.getElementById("profileName").value;
+  await update(ref(db, "users/"+myId), {name: name, about: document.getElementById("profileAbout").value});
+  const chatsSnap = await get(ref(db, "users/"+myId+"/chats"));
+  chatsSnap.forEach(child=>{update(ref(db, "users/"+child.val().id+"/chats/"+myId), {name: name})});
   alert("Profile Saved");
+  loadProfile();
   backHome();
 }
 
@@ -199,10 +212,11 @@ function loadChats(){
     const list = document.getElementById("chatList"); list.innerHTML = "";
     snap.forEach(child => {
       const d = child.val();
+      const displayName = d.name || d.id || "Unknown";
       const div = document.createElement("div");
       div.className = "flex items-center gap-3 p-3 hover:bg-[#202c33] cursor-pointer";
-      div.innerHTML = `<div class="avatar w-12 h-12 rounded-full flex items-center justify-center">${(d.name||"?")[0]}</div><div class="flex-1"><p class="font-semibold">${d.name}</p><p class="text-sm text-gray-400 truncate">${d.lastMsg||""}</p></div>`;
-      div.onclick = ()=>openChat(d.id, d.name);
+      div.innerHTML = `<div class="avatar w-12 h-12 rounded-full flex items-center justify-center">${displayName[0].toUpperCase()}</div><div class="flex-1"><p class="font-semibold">${displayName}</p><p class="text-sm text-gray-400 truncate">${d.lastMsg||""}</p></div>`;
+      div.onclick = ()=>openChat(d.id, displayName);
       list.appendChild(div);
     });
   });
@@ -212,24 +226,32 @@ window.startNew = async ()=>{
   const fid = document.getElementById("newId").value.trim();
   if(!fid) return alert("Enter ID");
   const snap = await get(ref(db, "users/"+fid));
-  openChat(fid, snap.exists()? snap.val().name : fid);
+  const name = snap.exists()? snap.val().name : fid;
+  openChat(fid, name);
 }
 
 function openChat(fid, name){
   currentChat = [myId, fid].sort().join("_");
   show("chatScreen");
-  document.getElementById("chatWith").innerText = name;
-  document.getElementById("chatAvatar").innerText = name[0];
-  document.getElementById("msgs").innerHTML = "";
-  set(ref(db, "users/" + myId + "/chats/" + fid), {id: fid, name: name});
+  document.getElementById("chatWith").innerText = name || fid;
+  document.getElementById("chatIdSmall").innerText = fid;
+  document.getElementById("chatAvatar").innerText = (name||fid)[0].toUpperCase();
+  document.getElementById("msgs").innerHTML = `<div class="empty-state"><i data-lucide="message-circle" class="w-16 h-16 mx-auto opacity-20"></i><p class="mt-4">No messages yet</p><p class="text-sm">Send a message to start chatting</p></div>`;
+  lucide.createIcons();
+  
+  set(ref(db, "users/" + myId + "/chats/" + fid), {id: fid, name: name || fid});
+  set(ref(db, "users/" + fid + "/chats/" + myId), {id: myId, name: document.getElementById("profileName").value});
   
   onChildAdded(ref(db, 'chats/'+currentChat), s => {
+    if(document.getElementById('msgs').querySelector('.empty-state')){
+      document.getElementById('msgs').innerHTML = "";
+    }
     const m = s.val();
     const d = document.createElement('div');
     d.className = m.sender === myId? 'text-right' : 'text-left';
     let content = '';
     if(m.type === 'image') content = `<img src="${m.url}" class="chat-img"/>`;
-    else if(m.type === 'audio') content = `<audio controls src="${m.url}"></audio>`;
+    else if(m.type === 'audio') content = `<audio controls src="${m.url}" class="max-w-xs"></audio>`;
     else content = `<div class="inline-block ${m.sender === myId? 'me' : 'them'} px-3 py-2 rounded-lg max-w-xs">${m.text}</div>`;
     d.innerHTML = content;
     document.getElementById('msgs').appendChild(d);
