@@ -16,18 +16,19 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 .authBtn{width:100%;padding:14px;background:#00BFA6;border:none;border-radius:8px;color:#000;font-weight:bold}
 #chatList{flex:1}
 .chatItem{display:flex;align-items:center;padding:15px;border-bottom:1px solid #1E2A36;cursor:pointer}
+.chatItem.starred{border-left:4px solid #FFD700}
 .avatar{width:50px;height:50px;border-radius:50%;background:#00BFA6;color:#000;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:12px;font-size:18px}
 .chatInfo{flex:1;min-width:0}
 .chatName{font-weight:bold;margin-bottom:4px}
 .lastMsg{color:#8A9BA8;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.headerBtn{font-size:20px;padding:10px;cursor:pointer}
+.headerBtn{font-size:22px;padding:10px;cursor:pointer}
 .fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#00BFA6;border:none;font-size:28px;color:#000}
 .empty{text-align:center;color:#71808d;padding:60px 20px}
 #messages{flex:1;padding:15px;overflow-y:auto}
 .msg{background:#1E2A36;padding:10px 14px;border-radius:12px;margin-bottom:8px;max-width:75%;width:fit-content}
 .msg.me{background:#00BFA6;color:#000;margin-left:auto}
 .msgBottom{font-size:10px;color:#8FA0AA;text-align:right;margin-top:3px}
-.me .msgBottom{color:#00110d}
+.me.msgBottom{color:#00110d}
 .blockedBanner{background:#5e2a2a;color:#ff8080;padding:10px;text-align:center;font-size:14px}
 .inputArea{display:flex;padding:10px;background:#121A22;border-top:1px solid #1E2A36;gap:8px}
 .inputArea input{flex:1;background:#0A0E13;border:1px solid #263442;border-radius:25px;padding:12px 16px;color:#fff;outline:none}
@@ -37,6 +38,10 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 .popupBox{background:#121A22;padding:20px;border-radius:12px;width:90%;max-width:400px;max-height:70vh;overflow-y:auto}
 .popupBtn{width:100%;padding:14px;background:#00BFA6;border:none;border-radius:8px;color:#000;font-weight:bold;margin-top:10px}
 .danger{background:#d32f2f!important;color:#fff!important}
+.menu{position:absolute;top:50px;right:10px;background:#1E2A36;border-radius:8px;z-index:50;min-width:180px}
+.menuItem{padding:12px 20px;cursor:pointer}
+.menuItem:hover{background:#263442}
+.checkbox{margin-right:10px}
 </style>
 </head>
 <body>
@@ -52,7 +57,10 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 
 <!-- CHATS SCREEN -->
 <div id="chatsScreen" class="screen hidden">
-  <div class="header"><h1>LinkUp</h1><div class="headerBtn" onclick="showBlocked()">🚫</div><div id="myId" style="font-size:12px;color:#8A9BA8"></div></div>
+  <div class="header">
+    <h1>LinkUp</h1>
+    <div class="headerBtn" onclick="toggleMenu()">⋮</div>
+  </div>
   <div id="chatList"></div>
   <button class="fab" onclick="showNewChat()">+</button>
 </div>
@@ -72,6 +80,14 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
   </div>
 </div>
 
+<!-- MAIN MENU -->
+<div id="mainMenu" class="menu hidden" onclick="event.stopPropagation()">
+  <div class="menuItem" onclick="showNewBroadcast()">New broadcast</div>
+  <div class="menuItem" onclick="showStarred()">Starred</div>
+  <div class="menuItem" onclick="showBlocked()">Blocked</div>
+  <div class="menuItem" onclick="switchAccount()">Switch account</div>
+</div>
+
 <!-- NEW CHAT POPUP -->
 <div id="newChatPopup" class="popup hidden">
   <div class="popupBox">
@@ -82,10 +98,32 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
   </div>
 </div>
 
+<!-- NEW BROADCAST POPUP -->
+<div id="broadcastPopup" class="popup hidden">
+  <div class="popupBox">
+    <h2>New Broadcast</h2>
+    <p style="color:#8A9BA8;font-size:14px;margin-bottom:10px">Select people to send message</p>
+    <div id="broadcastList"></div>
+    <input id="broadcastMsg" type="text" placeholder="Type broadcast message" style="width:100%;padding:12px;background:#0A0E13;border:1px solid #263442;border-radius:8px;color:#fff;margin:15px 0">
+    <button class="popupBtn" onclick="sendBroadcast()">Send Broadcast</button>
+    <button class="popupBtn" style="background:#1E2A36;color:#fff" onclick="hideBroadcast()">Cancel</button>
+  </div>
+</div>
+
+<!-- STARRED POPUP -->
+<div id="starredPopup" class="popup hidden" onclick="hideStarred()">
+  <div class="popupBox" onclick="event.stopPropagation()">
+    <h3>Starred Chats ⭐</h3>
+    <div id="starredList"></div>
+    <button class="popupBtn" style="background:#1E2A36;color:#fff" onclick="hideStarred()">Close</button>
+  </div>
+</div>
+
 <!-- CHAT MENU -->
 <div id="chatMenu" class="popup hidden" onclick="hideChatMenu()">
   <div class="popupBox" onclick="event.stopPropagation()">
     <h3>Chat Options</h3>
+    <button class="popupBtn" onclick="toggleStar()">⭐ Star Chat</button>
     <button class="popupBtn danger" onclick="blockUser()">Block User</button>
     <button class="popupBtn danger" onclick="deleteChat()">Delete Chat</button>
     <button class="popupBtn" style="background:#1E2A36;color:#fff" onclick="hideChatMenu()">Cancel</button>
@@ -120,7 +158,7 @@ if(localStorage.getItem('linkupId')){
 
 window.joinApp = () => {
   const inputId = document.getElementById('authIdInput').value.toUpperCase();
-  myId = inputId && inputId.startsWith("LNK-") ? inputId : "LNK-" + Math.floor(100000 + Math.random() * 900000);
+  myId = inputId && inputId.startsWith("LNK-")? inputId : "LNK-" + Math.floor(100000 + Math.random() * 900000);
   localStorage.setItem('linkupId', myId);
   showApp();
 }
@@ -128,17 +166,84 @@ window.joinApp = () => {
 function showApp(){
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('chatsScreen').classList.remove('hidden');
-  document.getElementById('myId').innerText = myId;
-  set(ref(db, 'users/' + myId), { online: true });
   loadChats();
 }
 
+window.toggleMenu = () => document.getElementById('mainMenu').classList.toggle('hidden');
 window.showNewChat = () => document.getElementById('newChatPopup').classList.remove('hidden');
 window.hideNewChat = () => document.getElementById('newChatPopup').classList.add('hidden');
 window.showChatMenu = () => document.getElementById('chatMenu').classList.remove('hidden');
 window.hideChatMenu = () => document.getElementById('chatMenu').classList.add('hidden');
-window.showBlocked = () => { document.getElementById('blockedPopup').classList.remove('hidden'); loadBlockedList(); }
-window.hideBlocked = () => document.getElementById('blockedPopup').classList.add('hidden');
+
+// 1. NEW BROADCAST
+window.showNewBroadcast = () => {
+  toggleMenu();
+  document.getElementById('broadcastPopup').classList.remove('hidden');
+  loadBroadcastList();
+}
+window.hideBroadcast = () => document.getElementById('broadcastPopup').classList.add('hidden');
+function loadBroadcastList(){
+  const list = document.getElementById('broadcastList');
+  list.innerHTML = "Loading...";
+  onValue(ref(db, 'chatList/' + myId), snap => {
+    const chats = snap.val();
+    list.innerHTML = "";
+    if(chats) Object.keys(chats).forEach(fid => {
+      list.innerHTML += `<label style="display:block;padding:8px"><input type="checkbox" class="checkbox" value="${fid}"> ${fid}</label>`;
+    });
+  }, {onlyOnce: true});
+}
+window.sendBroadcast = () => {
+  const msg = document.getElementById('broadcastMsg').value;
+  if(!msg) return alert("Type message");
+  const checked = [...document.querySelectorAll('#broadcastList input:checked')].map(i => i.value);
+  if(checked.length === 0) return alert("Select at least 1 person");
+  checked.forEach(fid => {
+    const chatId = [myId, fid].sort().join('_');
+    push(ref(db, 'chats/' + chatId), { sender: myId, text: "[Broadcast] " + msg, time: Date.now() });
+    update(ref(db, 'chatList/' + myId + '/' + fid), { lastTime: Date.now(), lastMsg: "[Broadcast] " + msg });
+    update(ref(db, 'chatList/' + fid + '/' + myId), { lastTime: Date.now(), lastMsg: "[Broadcast] " + msg });
+  });
+  alert("Broadcast sent to " + checked.length + " people");
+  hideBroadcast();
+}
+
+// 2. STARRED
+window.showStarred = () => {
+  toggleMenu();
+  document.getElementById('starredPopup').classList.remove('hidden');
+  loadStarred();
+}
+window.hideStarred = () => document.getElementById('starredPopup').classList.add('hidden');
+function loadStarred(){
+  const list = document.getElementById('starredList');
+  list.innerHTML = "Loading...";
+  onValue(ref(db, 'starred/' + myId), snap => {
+    const starred = snap.val();
+    list.innerHTML = "";
+    if(!starred) return list.innerHTML = `<div style="color:#8A9BA8;text-align:center;padding:20px">No starred chats</div>`;
+    Object.keys(starred).forEach(fid => {
+      list.innerHTML += `<div class="chatItem" onclick="document.getElementById('friendIdInput').value='${fid}'; startChat(); hideStarred()"><div class="avatar">${fid[4]}</div><div class="chatName">${fid}</div></div>`;
+    });
+  }, {onlyOnce: true});
+}
+window.toggleStar = () => {
+  const starredRef = ref(db, 'starred/' + myId + '/' + currentFriend);
+  onValue(starredRef, snap => {
+    if(snap.val()){ remove(starredRef); alert("Removed from starred"); }
+    else{ set(starredRef, true); alert("Added to starred"); }
+    hideChatMenu();
+    loadChats();
+  }, {onlyOnce: true});
+}
+
+// 3. SWITCH ACCOUNT
+window.switchAccount = () => {
+  if(confirm("Logout and switch account?")){
+    localStorage.removeItem('linkupId');
+    location.reload();
+  }
+}
 
 window.startChat = () => {
   const fid = document.getElementById('friendIdInput').value.toUpperCase();
@@ -173,7 +278,7 @@ window.sendMsg = () => {
 function checkBlocked(){
   onValue(ref(db, 'blocked/' + myId + '/' + currentFriend), snap => {
     const blocked = snap.val();
-    document.getElementById('blockedBanner').classList.toggle('hidden', !blocked);
+    document.getElementById('blockedBanner').classList.toggle('hidden',!blocked);
     document.getElementById('inputArea').classList.toggle('disabled', blocked);
   });
 }
@@ -188,11 +293,8 @@ window.blockUser = () => {
 }
 
 window.unblockUser = () => {
-  if(confirm("Unblock " + currentFriend + "?")){
-    remove(ref(db, 'blocked/' + myId + '/' + currentFriend));
-    alert(currentFriend + " unblocked");
-    checkBlocked();
-  }
+  remove(ref(db, 'blocked/' + myId + '/' + currentFriend));
+  checkBlocked();
 }
 
 window.deleteChat = () => {
@@ -203,28 +305,23 @@ window.deleteChat = () => {
   }
 }
 
+window.showBlocked = () => {
+  toggleMenu();
+  document.getElementById('blockedPopup').classList.remove('hidden');
+  loadBlockedList();
+}
+window.hideBlocked = () => document.getElementById('blockedPopup').classList.add('hidden');
 function loadBlockedList(){
   const list = document.getElementById('blockedList');
   list.innerHTML = "Loading...";
   onValue(ref(db, 'blocked/' + myId), snap => {
     const blocked = snap.val();
     list.innerHTML = "";
-    if(!blocked) {
-      list.innerHTML = `<div style="color:#8A9BA8;text-align:center;padding:20px">No blocked users</div>`;
-      return;
-    }
+    if(!blocked) return list.innerHTML = `<div style="color:#8A9BA8;text-align:center;padding:20px">No blocked users</div>`;
     Object.keys(blocked).forEach(fid => {
-      const div = document.createElement('div');
-      div.style = "display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid #263442";
-      div.innerHTML = `<span>${fid}</span><button onclick="unblockFromList('${fid}')" style="background:#d32f2f;border:none;padding:8px 12px;border-radius:6px;color:#fff">Unblock</button>`;
-      list.appendChild(div);
+      list.innerHTML += `<div style="display:flex;justify-content:space-between;padding:12px"><span>${fid}</span><button onclick="remove(ref(db, 'blocked/' + myId + '/' + fid)); loadBlockedList()" style="background:#d32f2f;border:none;padding:6px 10px;border-radius:6px;color:#fff">Unblock</button></div>`;
     });
   }, {onlyOnce: true});
-}
-
-window.unblockFromList = (fid) => {
-  remove(ref(db, 'blocked/' + myId + '/' + fid));
-  loadBlockedList();
 }
 
 function loadMessages() {
@@ -234,7 +331,7 @@ function loadMessages() {
     box.innerHTML = "";
     if(msgs) Object.values(msgs).forEach(m => {
       const div = document.createElement('div');
-      div.className = 'msg ' + (m.sender === myId ? 'me' : '');
+      div.className = 'msg ' + (m.sender === myId? 'me' : '');
       div.innerHTML = `${m.text}<div class="msgBottom">${new Date(m.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`;
       box.appendChild(div);
     });
@@ -247,25 +344,21 @@ function loadChats() {
     const chats = snap.val();
     const list = document.getElementById('chatList');
     list.innerHTML = "";
-    if(!chats) {
-      list.innerHTML = `<div class="empty">💬<br>No chats yet<br>Tap + to start</div>`;
-      return;
-    }
-    Object.keys(chats).forEach(fid => {
-      const div = document.createElement('div');
-      div.className = 'chatItem';
-      div.onclick = () => { document.getElementById('friendIdInput').value = fid; startChat(); }
-      div.innerHTML = `
-        <div class="avatar">${fid[4]}</div>
-        <div class="chatInfo">
-          <div class="chatName">${fid}</div>
-          <div class="lastMsg">${chats[fid].lastMsg || 'No messages'}</div>
-        </div>
-      `;
-      list.appendChild(div);
+    if(!chats) return list.innerHTML = `<div class="empty">💬<br>No chats yet<br>Tap + to start</div>`;
+    onValue(ref(db, 'starred/' + myId), starSnap => {
+      const starred = starSnap.val() || {};
+      Object.keys(chats).forEach(fid => {
+        const div = document.createElement('div');
+        div.className = 'chatItem ' + (starred[fid]? 'starred' : '');
+        div.onclick = () => { document.getElementById('friendIdInput').value = fid; startChat(); }
+        div.innerHTML = `<div class="avatar">${fid[4]}</div><div class="chatInfo"><div class="chatName">${starred[fid]? '⭐ ' : ''}${fid}</div><div class="lastMsg">${chats[fid].lastMsg || 'No messages'}</div></div>`;
+        list.appendChild(div);
+      });
     });
   });
 }
+
+document.addEventListener('click', () => document.getElementById('mainMenu').classList.add('hidden'));
 </script>
 </body>
 </html>
