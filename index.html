@@ -2,79 +2,159 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>LinkUp</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#00BFA6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body { background: #0A0E13; color: #fff; height: 100vh; overflow: hidden; }
+    .hidden { display: none !important; }
+    
+    /* SPLASH */
     #splash { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #00BFA6 0%, #00897B 100%); }
     #splash img { width: 100px; height: 100px; background: #fff; border-radius: 24px; margin-bottom: 20px; }
     #splash h1 { font-size: 32px; margin-bottom: 8px; }
-    #splash p { opacity: 0.8; }
     .loader { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-top: 20px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    #app { display: none; height: 100vh; }
+    
+    /* LOGIN */
+    #login { padding: 40px 20px; max-width: 400px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+    #login h2 { text-align: center; margin-bottom: 20px; color: #00BFA6; font-size: 28px; }
+    #login input { width: 100%; padding: 14px; margin: 10px 0; background: #1A1F25; border: 1px solid #2A3038; border-radius: 8px; color: #fff; font-size: 16px; }
+    #login button { width: 100%; padding: 14px; background: #00BFA6; border: none; border-radius: 8px; color: #fff; font-weight: bold; font-size: 16px; margin-top: 10px; cursor: pointer; }
+    
+    /* CHAT */
+    #chat { display: flex; flex-direction: column; height: 100vh; }
+    #chatHeader { padding: 15px; background: #1A1F25; border-bottom: 1px solid #2A3038; display: flex; justify-content: space-between; align-items: center; }
+    #chatHeader h3 { color: #00BFA6; }
+    #chatHeader button { background: #ff4444; border: none; padding: 8px 14px; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; }
+    #messages { flex: 1; overflow-y: auto; padding: 15px; background: #0A0E13; }
+    .msg { background: #1A1F25; padding: 10px 14px; border-radius: 12px; margin-bottom: 10px; max-width: 75%; word-wrap: break-word; }
+    .msg.me { background: #00BFA6; margin-left: auto; color: #000; }
+    #chatInput { display: flex; padding: 10px; background: #1A1F25; border-top: 1px solid #2A3038; }
+    #chatInput input { flex: 1; padding: 12px 16px; background: #0A0E13; border: 1px solid #2A3038; border-radius: 20px; color: #fff; font-size: 15px; outline: none; }
+    #chatInput button { margin-left: 10px; padding: 12px 20px; background: #00BFA6; border: none; border-radius: 20px; color: #000; font-weight: bold; cursor: pointer; }
   </style>
 </head>
 <body>
+  <!-- SPLASH SCREEN -->
   <div id="splash">
-    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%2300BFA6'/%3E%3C/svg%3E">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%2300BFA6'/%3E%3Cpath d='M30 50 L45 65 L70 35' stroke='%23000' stroke-width='8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
     <h1>LinkUp</h1>
     <p>Stay connected</p>
     <div class="loader"></div>
   </div>
 
-  <div id="app">
-    <h2>LinkUp is Loading...</h2>
-    <p>If you see this, Firebase don connect ✅</p>
+  <!-- LOGIN SCREEN -->
+  <div id="login" class="hidden">
+    <h2>Welcome to LinkUp</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <button onclick="signup()" style="background: #2A3038;">Create Account</button>
+  </div>
+
+  <!-- CHAT SCREEN -->
+  <div id="chat" class="hidden">
+    <div id="chatHeader">
+      <h3>Global Chat</h3>
+      <button onclick="logout()">Logout</button>
+    </div>
+    <div id="messages"></div>
+    <div id="chatInput">
+      <input type="text" id="msgInput" placeholder="Type message..." onkeypress="if(event.key==='Enter') sendMsg()">
+      <button onclick="sendMsg()">Send</button>
+    </div>
   </div>
 
   <script type="module">
     // IMPORT FIREBASE
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-    import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, push, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 
-    // YOUR FIREBASE CONFIG - I put your own here
+    // YOUR FIREBASE CONFIG
     const firebaseConfig = {
-      apiKey: "AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-      authDomain: "linkup-xxxxx.firebaseapp.com",
-      projectId: "linkup-xxxxx",
-      storageBucket: "linkup-xxxxx.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:xxxxxxxxxxxxxxxx"
+      apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
+      authDomain: "linkup-chat-3fdd5.firebaseapp.com",
+      databaseURL: "https://linkup-chat-3fdd5-default-rtdb.firebaseio.com",
+      projectId: "linkup-chat-3fdd5",
+      storageBucket: "linkup-chat-3fdd5.firebasestorage.app",
+      messagingSenderId: "177573067619",
+      appId: "1:177573067619:web:40e64ae330bb86200e7156",
+      measurementId: "G-Q73V61VYEQ"
     };
 
     // INIT FIREBASE
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
+    const db = getDatabase(app);
+    const analytics = getAnalytics(app);
 
-    console.log("Firebase Connected ✅");
+    let currentUser = null;
 
-    // CHECK IF USER LOGIN
+    // CHECK LOGIN STATE
     onAuthStateChanged(auth, (user) => {
-      document.getElementById('splash').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      
-      if (user) {
-        console.log("User logged in:", user.uid);
-      } else {
-        console.log("No user, show login screen");
-      }
+      setTimeout(() => {
+        document.getElementById('splash').classList.add('hidden');
+        if (user) {
+          currentUser = user;
+          document.getElementById('chat').classList.remove('hidden');
+          loadMessages();
+        } else {
+          document.getElementById('login').classList.remove('hidden');
+        }
+      }, 1500);
     });
 
-    // TIMEOUT AFTER 5 SECONDS IF FIREBASE FAIL
-    setTimeout(() => {
-      if(document.getElementById('splash').style.display !== 'none') {
-        document.getElementById('splash').style.display = 'none';
-        document.getElementById('app').innerHTML = '<h2>Error: Check Firebase Config</h2><p>Open console to see error</p>';
-        document.getElementById('app').style.display = 'block';
-      }
-    }, 5000);
+    // LOGIN
+    window.login = () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      if(!email || !password) return alert("Fill all fields");
+      signInWithEmailAndPassword(auth, email, password).catch(e => alert(e.message));
+    }
 
+    // SIGNUP
+    window.signup = () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      if(!email || !password) return alert("Fill all fields");
+      createUserWithEmailAndPassword(auth, email, password).catch(e => alert(e.message));
+    }
+
+    // LOGOUT
+    window.logout = () => signOut(auth);
+
+    // SEND MESSAGE
+    window.sendMsg = async () => {
+      const input = document.getElementById('msgInput');
+      if(input.value.trim() === '') return;
+      push(ref(db, "messages"), {
+        text: input.value,
+        uid: currentUser.uid,
+        timestamp: serverTimestamp()
+      });
+      input.value = '';
+    }
+
+    // LOAD MESSAGES REAL-TIME
+    function loadMessages() {
+      const messagesRef = ref(db, "messages");
+      onValue(messagesRef, (snapshot) => {
+        const messagesDiv = document.getElementById('messages');
+        messagesDiv.innerHTML = '';
+        snapshot.forEach(child => {
+          const msg = child.val();
+          const isMe = msg.uid === currentUser.uid;
+          messagesDiv.innerHTML += `<div class="msg ${isMe ? 'me' : ''}">${msg.text}</div>`;
+        });
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
+    }
   </script>
 </body>
 </html>
