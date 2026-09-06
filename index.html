@@ -3,45 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LinkUp Chat</title>
+<title>LinkUp - Zangi Style</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-body { background: #f0f2f5; }
-body.dark { background: #111b21; color: #e9edef; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+body { background: #0a1628; color: #fff; } /* Zangi dark blue */
 .container { max-width: 600px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; }
 .login { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 20px; gap: 15px; }
-.login h1 { color: #25D366; font-size: 36px; }
-.login input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-.btn { background: #25D366; color: white; border: none; padding: 14px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; font-size: 16px; }
+.login h1 { color: #00d4ff; font-size: 40px; } /* Zangi cyan */
+.login input { width: 100%; padding: 14px; border: 1px solid #1e3a5f; border-radius: 10px; background: #1e3a5f; color: white; font-size: 16px; }
+.btn { background: #00d4ff; color: #0a1628; border: none; padding: 14px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; font-size: 16px; }
+.header { background: #0f2742; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
 .chat-list, .chat-screen { display: none; flex: 1; flex-direction: column; }
-.header { background: #128C7E; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-.chat-item { padding: 15px; border-bottom: 1px solid #e9edef; cursor: pointer; }
-.messages { flex: 1; overflow-y: auto; padding: 15px; background: #e5ddd5; }
-.msg { background: white; padding: 8px 12px; margin: 8px 0; border-radius: 8px; max-width: 75%; }
-.msg.me { background: #d9fdd3; margin-left: auto; }
-.input-area { display: flex; padding: 10px; background: white; gap: 8px; }
-.input-area input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 20px; }
+.chat-item { padding: 15px; border-bottom: 1px solid #1e3a5f; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+.online { width: 10px; height: 10px; background: #4ade80; border-radius: 50%; }
+.messages { flex: 1; overflow-y: auto; padding: 15px; background: #0a1628; }
+.msg { background: #1e3a5f; padding: 10px 14px; margin: 8px 0; border-radius: 12px; max-width: 75%; }
+.msg.me { background: #00d4ff; color: #0a1628; margin-left: auto; }
+.input-area { display: flex; padding: 10px; background: #0f2742; gap: 8px; align-items: center; }
+.input-area input { flex: 1; padding: 12px; border: none; border-radius: 20px; background: #1e3a5f; color: white; }
+.mic-btn { background: #00d4ff; border: none; width: 45px; height: 45px; border-radius: 50%; color: #0a1628; font-size: 20px; }
+.call-btn { background: none; border: none; color: #00d4ff; font-size: 22px; }
+.voice { background: #1e3a5f; padding: 8px; border-radius: 20px; display: flex; align-items: center; gap: 8px; }
 </style>
 </head>
 <body>
 <div class="container">
   <div class="login" id="login">
-    <h1>LinkUp Chat</h1>
-    <p>Real-time chat with Firebase</p>
+    <h1>LinkUp</h1>
+    <p>Fast. Secure. Like Zangi</p>
     <input type="text" id="nameInput" placeholder="Enter your name">
-    <button class="btn" onclick="startApp()">Start Chatting</button>
+    <button class="btn" onclick="startApp()">Start</button>
   </div>
 
   <div class="chat-list" id="chatList">
     <div class="header">
-      <h2>LinkUp</h2>
-      <button onclick="logout()" style="background:none;border:none;color:white;">Logout</button>
+      <h2>Chats</h2>
     </div>
     <div style="padding:10px;">
-      <input type="text" id="newChatName" placeholder="Friend's name" style="width:70%; padding:10px;">
-      <button class="btn" onclick="newChat()" style="width:28%;">New Chat</button>
+      <input type="text" id="newChatName" placeholder="Friend's name" style="width:70%; padding:10px; background:#1e3a5f; border:none; color:white; border-radius:10px;">
+      <button class="btn" onclick="newChat()" style="width:28%;">New</button>
     </div>
     <div id="chats"></div>
   </div>
@@ -50,20 +52,20 @@ body.dark { background: #111b21; color: #e9edef; }
     <div class="header">
       <button onclick="backToList()" style="background:none;border:none;color:white;font-size:20px;">←</button>
       <h3 id="chatWith"></h3>
-      <div></div>
+      <button class="call-btn" onclick="alert('Video call coming soon!')">📹</button>
     </div>
     <div class="messages" id="messages"></div>
     <div class="input-area">
-      <input type="text" id="msgInput" placeholder="Type a message" onkeypress="if(event.key==='Enter') sendMsg()">
+      <input type="text" id="msgInput" placeholder="Message..." onkeypress="if(event.key==='Enter') sendMsg()">
+      <button class="mic-btn" onmousedown="startRecord()" onmouseup="stopRecord()">🎤</button>
       <button class="btn" onclick="sendMsg()" style="width:80px;">Send</button>
     </div>
   </div>
 </div>
 
 <script>
-// YOUR FIREBASE CONFIG FROM SCREENSHOT
 const firebaseConfig = {
-  apiKey: "AIzaSyDyHqEncYDaQs", // COPY FULL ONE FROM YOUR SCREENSHOT
+  apiKey: "AIzaSyDyHqEncYDaQs", // PASTE YOUR FULL KEY
   authDomain: "linkup-chat-3fd.firebaseapp.com",
   databaseURL: "https://linkup-chat-3fd-default-rtdb.firebaseio.com",
   projectId: "Linkup-chat-3fdd"
@@ -73,10 +75,12 @@ const db = firebase.database();
 
 let myName = "";
 let currentChat = "";
+let recorder, audioChunks = [];
 
 function startApp() {
   myName = document.getElementById('nameInput').value.trim();
   if(!myName) return alert("Enter your name");
+  db.ref('online/' + myName).set(true);
   document.getElementById('login').style.display = 'none';
   document.getElementById('chatList').style.display = 'flex';
 }
@@ -86,7 +90,6 @@ function newChat() {
   if(!friend) return alert("Enter friend name");
   currentChat = [myName, friend].sort().join('_');
   openChat(friend);
-  document.getElementById('newChatName').value = '';
 }
 
 function openChat(friend) {
@@ -95,31 +98,46 @@ function openChat(friend) {
   document.getElementById('chatWith').innerText = friend;
   
   db.ref('chats/' + currentChat).on('value', snap => {
-    let msgs = [];
-    snap.forEach(child => msgs.push(child.val()));
     let html = '';
-    msgs.forEach(m => {
-      html += `<div class="msg ${m.from === myName ? 'me' : ''}"><b>${m.from}:</b> ${m.text}</div>`;
+    snap.forEach(child => {
+      let m = child.val();
+      if(m.type === 'voice') {
+        html += `<div class="msg ${m.from === myName ? 'me' : ''}"><div class="voice">🎤 <audio controls src="${m.url}"></audio></div></div>`;
+      } else {
+        html += `<div class="msg ${m.from === myName ? 'me' : ''}"><b>${m.from}:</b> ${m.text}</div>`;
+      }
     });
     document.getElementById('messages').innerHTML = html;
-    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
   });
 }
 
 function sendMsg() {
   let text = document.getElementById('msgInput').value.trim();
   if(!text) return;
-  db.ref('chats/' + currentChat).push({from: myName, text: text, time: Date.now()});
+  db.ref('chats/' + currentChat).push({from: myName, text: text, type: 'text', time: Date.now()});
   document.getElementById('msgInput').value = '';
 }
+
+function startRecord() {
+  navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
+    recorder = new MediaRecorder(stream);
+    recorder.start();
+    recorder.ondataavailable = e => audioChunks.push(e.data);
+    recorder.onstop = () => {
+      let blob = new Blob(audioChunks, {type: 'audio/webm'});
+      let url = URL.createObjectURL(blob);
+      db.ref('chats/' + currentChat).push({from: myName, type: 'voice', url: url, time: Date.now()});
+      audioChunks = [];
+    };
+  });
+}
+function stopRecord() { if(recorder) recorder.stop(); }
 
 function backToList() {
   db.ref('chats/' + currentChat).off();
   document.getElementById('chatScreen').style.display = 'none';
   document.getElementById('chatList').style.display = 'flex';
 }
-
-function logout() { location.reload(); }
 </script>
 </body>
 </html>
