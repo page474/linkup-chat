@@ -7,47 +7,103 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body { background: #111b21; color: white; font-family: Arial; }
+.app { height: 100dvh; max-width: 900px; margin: auto; }
+.topbar { background: #202c33; }
 .me { background: #005c4b; }
 .them { background: #202c33; }
 .chat-img { max-width: 260px; border-radius: 8px; }
+.avatar { background: linear-gradient(135deg,#7c3aed,#2563eb); }
 </style>
 </head>
 <body>
+<div class="app">
 
-<div id="home" class="h-screen flex flex-col">
-  <div class="bg-[#202c33] p-4">
-    <h1 class="text-2xl font-bold">LinkUp</h1>
-    <div class="bg-[#2a3942] p-3 rounded-xl mt-2">
-      <p class="text-xs text-gray-400">Your ID</p>
-      <p id="myId" class="text-[#00a884] font-bold">Loading...</p>
+<!-- HOME SCREEN -->
+<section id="homeScreen" class="h-full flex flex-col">
+  <header class="topbar p-4 flex justify-between">
+    <div>
+      <h1 class="text-2xl font-bold">LinkUp</h1>
+      <p id="myIdSmall" class="text-xs text-gray-400"></p>
     </div>
-  </div>
+    <button onclick="openProfile()" class="text-xl">⚙️</button>
+  </header>
+
   <div class="p-3">
     <div class="flex gap-2">
       <input id="newId" placeholder="Enter friend's LinkUp ID" class="flex-1 bg-[#202c33] rounded-full px-4 py-3">
-      <button onclick="startNew()" class="bg-[#00a884] w-12 h-12 rounded-full">+</button>
+      <button onclick="startNew()" class="bg-[#00a884] w-12 h-12 rounded-full text-xl">+</button>
     </div>
   </div>
-  <div id="chatList" class="flex-1 overflow-y-auto"></div>
-</div>
 
-<div id="chat" class="hidden h-screen flex-col">
-  <div class="bg-[#202c33] p-3 flex items-center gap-3">
-    <button onclick="back()" class="text-2xl">←</button>
-    <p id="chatWith" class="font-bold"></p>
+  <div id="chatList" class="flex-1 overflow-y-auto"></div>
+
+  <nav class="topbar grid grid-cols-3 py-2 text-center border-t border-[#344047]">
+    <button onclick="showHome()" class="flex flex-col items-center text-[#00a884]"><span>💬</span><span class="text-xs">Chats</span></button>
+    <button onclick="showStatus()" class="flex flex-col items-center"><span>⭕</span><span class="text-xs">Status</span></button>
+    <button onclick="openProfile()" class="flex flex-col items-center"><span>👤</span><span class="text-xs">Profile</span></button>
+  </nav>
+</section>
+
+<!-- CHAT SCREEN -->
+<section id="chatScreen" class="hidden h-full flex-col">
+  <header class="topbar p-3 flex items-center gap-3">
+    <button onclick="backHome()" class="text-2xl">←</button>
+    <div id="chatAvatar" class="avatar w-11 h-11 rounded-full flex items-center justify-center font-bold">A</div>
+    <p id="chatWith" class="font-bold flex-1"></p>
+    <button onclick="toast('Calls need extra setup')" class="text-xl">📞</button>
+  </header>
+
+  <main id="msgs" class="flex-1 overflow-y-auto p-3 space-y-2"></main>
+
+  <div class="topbar p-2">
+    <div class="flex gap-2 items-center">
+      <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,.pdf,.doc" onchange="sendFile(event)">
+      <button onclick="document.getElementById('fileInput').click()" class="text-2xl">📎</button>
+      <input id="msg" placeholder="Message" class="flex-1 bg-[#2a3942] rounded-full px-4 py-3">
+      <button onclick="send()" class="bg-[#00a884] w-11 h-11 rounded-full">➤</button>
+    </div>
   </div>
-  <div id="msgs" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
-  <div class="bg-[#202c33] p-2 flex gap-2">
-    <input type="file" id="file" accept="image/*" class="hidden" onchange="sendImg(event)">
-    <button onclick="document.getElementById('file').click()" class="text-2xl">📎</button>
-    <input id="msg" placeholder="Message" class="flex-1 bg-[#2a3942] rounded-full px-4 py-3">
-    <button onclick="send()" class="bg-[#00a884] w-11 h-11 rounded-full">➤</button>
+</section>
+
+<!-- PROFILE SCREEN -->
+<section id="profileScreen" class="hidden h-full flex-col">
+  <header class="topbar p-4 flex items-center gap-3">
+    <button onclick="backHome()" class="text-2xl">←</button>
+    <h2 class="text-xl font-bold">Profile</h2>
+  </header>
+  <div class="p-6">
+    <div id="profileAvatar" class="avatar w-28 h-28 rounded-full flex items-center justify-center text-4xl font-bold mx-auto"></div>
+    <label class="text-gray-400 text-sm mt-5 block">Name</label>
+    <input id="profileName" class="w-full bg-[#202c33] rounded-lg p-3 mt-1">
+    <label class="text-gray-400 text-sm block mt-5">About</label>
+    <input id="profileAbout" class="w-full bg-[#202c33] rounded-lg p-3 mt-1">
+    <label class="text-gray-400 text-sm block mt-5">Your LinkUp ID</label>
+    <div id="profileId" class="bg-[#202c33] rounded-lg p-3 mt-1 text-[#00a884]"></div>
+    <button onclick="saveProfile()" class="w-full bg-[#00a884] rounded-lg py-3 mt-6 font-bold">Save Profile</button>
   </div>
+</section>
+
+<!-- STATUS SCREEN -->
+<section id="statusScreen" class="hidden h-full flex-col">
+  <header class="topbar p-4 flex items-center gap-3">
+    <button onclick="backHome()" class="text-2xl">←</button>
+    <h2 class="text-xl font-bold">Status</h2>
+  </header>
+  <div class="p-4">
+    <button onclick="createStatus()" class="w-full bg-[#202c33] p-4 rounded-lg text-left">
+      <b>➕ Add status</b>
+      <p class="text-sm text-gray-400 mt-1">Share a text status</p>
+    </button>
+    <h3 class="font-bold mt-6 mb-3">Recent updates</h3>
+    <div id="statusList"></div>
+  </div>
+</section>
+
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, push, onChildAdded, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, push, onChildAdded, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -61,49 +117,79 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
-let myId = '';
-let chatId = '';
+let myId = "";
+let currentChat = "";
+let currentFriend = "";
 
 signInAnonymously(auth);
-onAuthStateChanged(auth, u => {
-  if(u){
-    myId = 'LinkUp_' + u.uid.slice(0,8).toUpperCase();
-    document.getElementById('myId').innerText = myId;
-    loadChats();
-  }
+onAuthStateChanged(auth, async user => {
+  if (!user) return;
+  myId = "LinkUp_" + user.uid.substring(0, 8).toUpperCase();
+  localStorage.setItem("linkup_id", myId);
+  document.getElementById("myIdSmall").innerText = myId;
+  document.getElementById("profileId").innerText = myId;
+  loadChats();
+  loadProfile();
 });
 
+function show(s){ ["homeScreen","chatScreen","profileScreen","statusScreen"].forEach(id=>document.getElementById(id).classList.add("hidden")); document.getElementById(s).classList.remove("hidden"); }
+window.showHome = ()=>show("homeScreen");
+window.showStatus = ()=>show("statusScreen");
+window.openProfile = ()=>{show("profileScreen")};
+window.backHome = ()=>show("homeScreen");
+
+async function loadProfile(){
+  const snap = await get(ref(db, "users/"+myId));
+  if(snap.exists()){
+    document.getElementById("profileName").value = snap.val().name || myId;
+    document.getElementById("profileAbout").value = snap.val().about || "Available";
+    document.getElementById("profileAvatar").innerText = (snap.val().name||myId)[0];
+  }
+}
+window.saveProfile = ()=>{
+  set(ref(db, "users/"+myId), {
+    id: myId, name: document.getElementById("profileName").value,
+    about: document.getElementById("profileAbout").value
+  });
+  toast("Profile Saved");
+  backHome();
+}
+
 function loadChats(){
-  onValue(ref(db, 'users/' + myId + '/chats'), snap => {
-    document.getElementById('chatList').innerHTML = '';
+  onValue(ref(db, "users/" + myId + "/chats"), snap => {
+    const list = document.getElementById("chatList"); list.innerHTML = "";
     snap.forEach(child => {
       const d = child.val();
-      const div = document.createElement('div');
-      div.className = 'p-3 flex gap-3 hover:bg-[#202c33] cursor-pointer';
-      div.onclick = () => open(d.id, d.name);
-      div.innerHTML = `<div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">${d.name[0]}</div><div><p class="font-bold">${d.name}</p><p class="text-sm text-gray-400">${d.lastMsg || ''}</p></div>`;
-      document.getElementById('chatList').appendChild(div);
+      const div = document.createElement("div");
+      div.className = "flex items-center gap-3 p-3 hover:bg-[#202c33] cursor-pointer";
+      div.innerHTML = `<div class="avatar w-12 h-12 rounded-full flex items-center justify-center">${(d.name||"?")[0]}</div><div><p class="font-semibold">${d.name}</p><p class="text-sm text-gray-400">${d.lastMsg||""}</p></div>`;
+      div.onclick = ()=>openChat(d.id, d.name);
+      list.appendChild(div);
     });
   });
 }
 
-window.startNew = () => {
-  const fid = document.getElementById('newId').value.trim();
-  if(fid) open(fid, fid);
+window.startNew = async ()=>{
+  const fid = document.getElementById("newId").value.trim();
+  if(!fid) return toast("Enter ID");
+  const snap = await get(ref(db, "users/"+fid));
+  openChat(fid, snap.exists()? snap.val().name : fid);
 }
 
-function open(fid, name){
-  chatId = [myId, fid].sort().join('_');
-  document.getElementById('home').classList.add('hidden');
-  document.getElementById('chat').classList.remove('hidden');
-  document.getElementById('chatWith').innerText = name;
-  set(ref(db, 'users/' + myId + '/chats/' + fid), {id: fid, name: name});
+function openChat(fid, name){
+  currentFriend = fid;
+  currentChat = [myId, fid].sort().join("_");
+  show("chatScreen");
+  document.getElementById("chatWith").innerText = name;
+  document.getElementById("chatAvatar").innerText = name[0];
+  document.getElementById("msgs").innerHTML = "";
+  set(ref(db, "users/" + myId + "/chats/" + fid), {id: fid, name: name});
   
-  onChildAdded(ref(db, 'chats/'+chatId), s => {
+  onChildAdded(ref(db, 'chats/'+currentChat), s => {
     const m = s.val();
     const d = document.createElement('div');
     d.className = m.sender === myId? 'text-right' : 'text-left';
-    let content = m.type === 'image'? `<img src="${m.url}" class="chat-img"/>` : `<div class="inline-block ${m.sender === myId? 'me' : 'them'} px-3 py-2 rounded-lg">${m.text}</div>`;
+    let content = m.type === 'image'? `<img src="${m.url}" class="chat-img"/>` : `<div class="inline-block ${m.sender === myId? 'me' : 'them'} px-3 py-2 rounded-lg max-w-xs">${m.text}</div>`;
     d.innerHTML = content;
     document.getElementById('msgs').appendChild(d);
     document.getElementById('msgs').scrollTop = 99999;
@@ -111,25 +197,38 @@ function open(fid, name){
   });
 }
 
-window.back = () => {
-  document.getElementById('chat').classList.add('hidden');
-  document.getElementById('home').classList.remove('hidden');
-}
-
-window.send = () => {
+window.send = ()=>{
   const t = document.getElementById('msg').value;
-  if(t){ push(ref(db, 'chats/'+chatId), {sender:myId, text:t, type:'text'}); document.getElementById('msg').value = '';}
+  if(t){ push(ref(db, 'chats/'+currentChat), {sender:myId, text:t, type:'text'}); document.getElementById('msg').value = '';}
 }
 
-// SEND IMAGE WITH BASE64 - NO STORAGE NEEDED
-window.sendImg = (e) => {
+// SEND FILE AS BASE64 - NO STORAGE NEEDED
+window.sendFile = (e)=>{
   const file = e.target.files[0];
   const reader = new FileReader();
   reader.onload = function(event){
-    push(ref(db, 'chats/'+chatId), {sender: myId, type: 'image', url: event.target.result});
+    push(ref(db, 'chats/'+currentChat), {sender: myId, type: 'image', url: event.target.result});
   }
   reader.readAsDataURL(file);
 }
+
+window.createStatus = ()=>{
+  const status = prompt("Enter your status:");
+  if(status) set(ref(db, "status/"+myId), {text: status, time: Date.now()});
+  loadStatuses();
+}
+
+function loadStatuses(){
+  onValue(ref(db, "status"), snap=>{
+    const list = document.getElementById("statusList"); list.innerHTML="";
+    snap.forEach(child=>{
+      const d = child.val();
+      list.innerHTML += `<div class="bg-[#202c33] p-3 rounded-lg mb-2">${d.text}</div>`;
+    });
+  });
+}
+
+window.toast = (msg)=>{alert(msg)};
 </script>
 </body>
 </html>
