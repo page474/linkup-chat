@@ -6,43 +6,52 @@
 <title>LinkUp</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  body { background: #0f172a; }
- .bubble-me { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
- .bubble-them { background: #1e293b; }
- .chat-img { max-width: 250px; border-radius: 16px; }
+  body { background: #111b21; }
+ .bubble-me { background: #005c4b; }
+ .bubble-them { background: #202c33; }
+ .chat-img { max-width: 200px; border-radius: 8px; }
 </style>
 </head>
 <body class="text-white h-screen flex flex-col">
 
-<div id="login" class="flex-1 flex items-center justify-center p-4">
-  <div class="w-full max-w-md bg-slate-800 rounded-2xl p-6">
-    <h1 class="text-2xl font-bold text-center mb-4">LinkUp 💬</h1>
-    <div class="bg-slate-900 rounded-xl p-4 mb-4">
-      <p class="text-slate-400 text-sm">Your ID</p>
-      <p id="myId" class="text-xl font-bold text-indigo-400">Loading...</p>
-    </div>
-    <input id="friendId" placeholder="Friend's ID" class="w-full bg-slate-900 rounded-xl p-3 mb-3">
-    <button onclick="start()" class="w-full bg-indigo-600 rounded-xl p-3 font-bold">Start Chat</button>
+<!-- CHATS LIST SCREEN -->
+<div id="homeScreen">
+  <div class="bg-[#202c33] p-3 flex justify-between items-center">
+    <h1 class="text-2xl font-bold">LinkUp</h1>
+    <div class="text-xl">⋮</div>
   </div>
+  
+  <div class="bg-[#111b21] p-3">
+    <input id="newId" placeholder="Enter friend ID to start new chat" 
+      class="w-full bg-[#202c33] rounded-lg p-2 text-sm">
+  </div>
+
+  <div id="chatList" class="flex-1 overflow-y-auto">
+    <!-- Chats will load here -->
+  </div>
+
+  <div class="fixed bottom-4 right-4 bg-[#00a884] w-14 h-14 rounded-full flex items-center justify-center text-3xl" onclick="startNew()">+</div>
 </div>
 
-<div id="chat" class="hidden h-screen flex-col">
-  <div class="p-4 border-b border-slate-700 flex items-center gap-3">
-    <button onclick="back()" class="text-2xl">←</button>
+<!-- CHAT SCREEN -->
+<div id="chatScreen" class="hidden h-screen flex-col">
+  <div class="bg-[#202c33] p-3 flex items-center gap-3">
+    <button onclick="backHome()" class="text-2xl">←</button>
+    <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center font-bold" id="chatAvatar">A</div>
     <p id="chatWith" class="font-bold"></p>
   </div>
-  <div id="msgs" class="flex-1 overflow-y-auto p-4 space-y-2"></div>
-  <div class="p-3 border-t border-slate-700 flex gap-2">
+  <div id="msgs" class="flex-1 overflow-y-auto p-4 space-y-2 bg-[#0b141a]" style="background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==')"></div>
+  <div class="bg-[#202c33] p-2 flex gap-2 items-center">
     <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="sendImage(event)">
-    <button onclick="document.getElementById('fileInput').click()" class="bg-slate-700 w-12 h-12 rounded-full text-xl">📎</button>
-    <input id="msg" placeholder="Type message..." class="flex-1 bg-slate-800 rounded-full px-4">
-    <button onclick="send()" class="bg-indigo-600 px-6 rounded-full">➤</button>
+    <button onclick="document.getElementById('fileInput').click()" class="text-2xl px-2">📎</button>
+    <input id="msg" placeholder="Message" class="flex-1 bg-[#2a3942] rounded-full px-4 py-2">
+    <button onclick="send()" class="bg-[#00a884] w-10 h-10 rounded-full">➤</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, push, onChildAdded, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -58,65 +67,87 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 let myId = '';
-let chatId = '';
+let currentChat = '';
 
 signInAnonymously(auth);
 onAuthStateChanged(auth, u => {
   if(u){
     myId = 'LinkUp_' + u.uid.slice(0,4).toUpperCase();
-    document.getElementById('myId').innerText = myId;
+    loadChats();
   }
 });
 
-window.back = () => {
-  document.getElementById('chat').classList.add('hidden');
-  document.getElementById('login').classList.remove('hidden');
+function loadChats(){
+  onValue(ref(db, 'users/' + myId + '/chats'), (snap) => {
+    const list = document.getElementById('chatList');
+    list.innerHTML = '';
+    snap.forEach(child => {
+      const data = child.val();
+      const div = document.createElement('div');
+      div.className = 'flex items-center gap-3 p-3 hover:bg-[#202c33] cursor-pointer';
+      div.onclick = () => openChat(data.id, data.name);
+      div.innerHTML = `
+        <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center font-bold">${data.name[0]}</div>
+        <div class="flex-1">
+          <div class="flex justify-between">
+            <p class="font-semibold">${data.name}</p>
+            <p class="text-xs text-slate-400">${data.time || ''}</p>
+          </div>
+          <p class="text-sm text-slate-400 truncate">${data.lastMsg || ''}</p>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  });
 }
 
-window.start = () => {
-  const fid = document.getElementById('friendId').value;
-  if(!fid) return;
-  chatId = [myId, fid].sort().join('_');
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('chat').classList.remove('hidden');
-  document.getElementById('chatWith').innerText = fid;
-  
-  onChildAdded(ref(db, 'chats/'+chatId), s => {
+window.startNew = () => {
+  const fid = document.getElementById('newId').value.trim();
+  if(fid) openChat(fid, fid);
+}
+
+function openChat(fid, name){
+  currentChat = [myId, fid].sort().join('_');
+  document.getElementById('homeScreen').classList.add('hidden');
+  document.getElementById('chatScreen').classList.remove('hidden');
+  document.getElementById('chatWith').innerText = name;
+  document.getElementById('chatAvatar').innerText = name[0];
+  document.getElementById('msgs').innerHTML = '';
+
+  // Save chat to list
+  set(ref(db, 'users/' + myId + '/chats/' + fid), {id: fid, name: name});
+  set(ref(db, 'users/' + fid + '/chats/' + myId), {id: myId, name: myId});
+
+  onChildAdded(ref(db, 'chats/'+currentChat), s => {
     const m = s.val();
     const d = document.createElement('div');
     d.className = m.sender === myId? 'text-right' : 'text-left';
-    
-    let content = '';
-    if(m.type === 'image'){
-      content = `<img src="${m.url}" class="chat-img"/>`;
-    } else {
-      content = `<div class="inline-block ${m.sender === myId? 'bubble-me' : 'bubble-them'} px-4 py-2 rounded-2xl">${m.text}</div>`;
-    }
-    d.innerHTML = content;
+    let content = m.type === 'image'? `<img src="${m.url}" class="chat-img"/>` : m.text;
+    d.innerHTML = `<div class="inline-block ${m.sender === myId? 'bubble-me' : 'bubble-them'} px-3 py-2 rounded-lg max-w-xs">${content}</div>`;
     document.getElementById('msgs').appendChild(d);
     document.getElementById('msgs').scrollTop = 99999;
+    
+    // Update last message
+    const last = m.type === 'image'? '📷 Photo' : m.text;
+    set(ref(db, 'users/' + myId + '/chats/' + fid + '/lastMsg'), last);
   });
+}
+
+window.backHome = () => {
+  document.getElementById('chatScreen').classList.add('hidden');
+  document.getElementById('homeScreen').classList.remove('hidden');
 }
 
 window.send = () => {
   const t = document.getElementById('msg').value;
-  if(t){ push(ref(db, 'chats/'+chatId), {sender:myId, text:t, type:'text', time:Date.now()}); document.getElementById('msg').value = '';}
+  if(t){ push(ref(db, 'chats/'+currentChat), {sender:myId, text:t, type:'text', time:Date.now()}); document.getElementById('msg').value = '';}
 }
 
-// NEW: SEND IMAGE FUNCTION
 window.sendImage = (e) => {
   const file = e.target.files[0];
-  if(!file) return;
-  
   const reader = new FileReader();
   reader.onload = function(event){
-    // Convert image to base64 and send
-    push(ref(db, 'chats/'+chatId), {
-      sender: myId, 
-      type: 'image', 
-      url: event.target.result,
-      time: Date.now()
-    });
+    push(ref(db, 'chats/'+currentChat), {sender: myId, type: 'image', url: event.target.result, time: Date.now()});
   }
   reader.readAsDataURL(file);
 }
