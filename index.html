@@ -7,34 +7,42 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   body { background: #0f172a; }
-  .bubble-me { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
-  .bubble-them { background: #1e293b; }
+ .bubble-me { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+ .bubble-them { background: #1e293b; }
+ .chat-img { max-width: 250px; border-radius: 16px; }
 </style>
 </head>
-<body class="text-white min-h-screen flex items-center justify-center p-4">
+<body class="text-white h-screen flex flex-col">
 
-<div id="login" class="w-full max-w-md bg-slate-800 rounded-2xl p-6">
-  <h1 class="text-2xl font-bold text-center mb-4">LinkUp 💬</h1>
-  <div class="bg-slate-900 rounded-xl p-4 mb-4">
-    <p class="text-slate-400 text-sm">Your ID</p>
-    <p id="myId" class="text-xl font-bold text-indigo-400">Loading...</p>
+<div id="login" class="flex-1 flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-slate-800 rounded-2xl p-6">
+    <h1 class="text-2xl font-bold text-center mb-4">LinkUp 💬</h1>
+    <div class="bg-slate-900 rounded-xl p-4 mb-4">
+      <p class="text-slate-400 text-sm">Your ID</p>
+      <p id="myId" class="text-xl font-bold text-indigo-400">Loading...</p>
+    </div>
+    <input id="friendId" placeholder="Friend's ID" class="w-full bg-slate-900 rounded-xl p-3 mb-3">
+    <button onclick="start()" class="w-full bg-indigo-600 rounded-xl p-3 font-bold">Start Chat</button>
   </div>
-  <input id="friendId" placeholder="Friend's ID" class="w-full bg-slate-900 rounded-xl p-3 mb-3">
-  <button onclick="start()" class="w-full bg-indigo-600 rounded-xl p-3 font-bold">Start Chat</button>
 </div>
 
-<div id="chat" class="hidden w-full h-screen flex-col">
-  <div class="p-4 border-b border-slate-700"><p id="chatWith"></p></div>
+<div id="chat" class="hidden h-screen flex-col">
+  <div class="p-4 border-b border-slate-700 flex items-center gap-3">
+    <button onclick="back()" class="text-2xl">←</button>
+    <p id="chatWith" class="font-bold"></p>
+  </div>
   <div id="msgs" class="flex-1 overflow-y-auto p-4 space-y-2"></div>
-  <div class="p-3 flex gap-2">
-    <input id="msg" class="flex-1 bg-slate-800 rounded-full px-4">
-    <button onclick="send()" class="bg-indigo-600 px-6 rounded-full">Send</button>
+  <div class="p-3 border-t border-slate-700 flex gap-2">
+    <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="sendImage(event)">
+    <button onclick="document.getElementById('fileInput').click()" class="bg-slate-700 w-12 h-12 rounded-full text-xl">📎</button>
+    <input id="msg" placeholder="Type message..." class="flex-1 bg-slate-800 rounded-full px-4">
+    <button onclick="send()" class="bg-indigo-600 px-6 rounded-full">➤</button>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -60,23 +68,57 @@ onAuthStateChanged(auth, u => {
   }
 });
 
+window.back = () => {
+  document.getElementById('chat').classList.add('hidden');
+  document.getElementById('login').classList.remove('hidden');
+}
+
 window.start = () => {
   const fid = document.getElementById('friendId').value;
+  if(!fid) return;
   chatId = [myId, fid].sort().join('_');
   document.getElementById('login').classList.add('hidden');
   document.getElementById('chat').classList.remove('hidden');
   document.getElementById('chatWith').innerText = fid;
+  
   onChildAdded(ref(db, 'chats/'+chatId), s => {
     const m = s.val();
     const d = document.createElement('div');
-    d.className = m.sender === myId ? 'text-right' : 'text-left';
-    d.innerHTML = `<div class="inline-block ${m.sender === myId ? 'bubble-me' : 'bubble-them'} px-4 py-2 rounded-2xl">${m.text}</div>`;
+    d.className = m.sender === myId? 'text-right' : 'text-left';
+    
+    let content = '';
+    if(m.type === 'image'){
+      content = `<img src="${m.url}" class="chat-img"/>`;
+    } else {
+      content = `<div class="inline-block ${m.sender === myId? 'bubble-me' : 'bubble-them'} px-4 py-2 rounded-2xl">${m.text}</div>`;
+    }
+    d.innerHTML = content;
     document.getElementById('msgs').appendChild(d);
+    document.getElementById('msgs').scrollTop = 99999;
   });
 }
+
 window.send = () => {
   const t = document.getElementById('msg').value;
-  if(t){ push(ref(db, 'chats/'+chatId), {sender:myId, text:t}); document.getElementById('msg').value = '';}
+  if(t){ push(ref(db, 'chats/'+chatId), {sender:myId, text:t, type:'text', time:Date.now()}); document.getElementById('msg').value = '';}
+}
+
+// NEW: SEND IMAGE FUNCTION
+window.sendImage = (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(event){
+    // Convert image to base64 and send
+    push(ref(db, 'chats/'+chatId), {
+      sender: myId, 
+      type: 'image', 
+      url: event.target.result,
+      time: Date.now()
+    });
+  }
+  reader.readAsDataURL(file);
 }
 </script>
 </body>
