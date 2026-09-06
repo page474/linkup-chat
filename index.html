@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LinkUp</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 <style>
 body { background: #111b21; color: white; font-family: Arial; }
 .app { height: 100dvh; max-width: 900px; margin: auto; }
@@ -21,35 +22,46 @@ body { background: #111b21; color: white; font-family: Arial; }
 <div class="app">
 
 <!-- HOME SCREEN -->
-<section id="homeScreen" class="h-full flex flex-col">
-  <header class="topbar p-4 flex justify-between">
+<section id="homeScreen" class="h-full flex-col">
+  <header class="topbar p-4 flex justify-between items-center">
     <div>
       <h1 class="text-2xl font-bold">LinkUp</h1>
       <p id="myIdSmall" class="text-xs text-gray-400"></p>
     </div>
-    <button onclick="openProfile()" class="text-xl">⚙️</button>
+    <button onclick="openProfile()"><i data-lucide="settings" class="w-6 h-6"></i></button>
   </header>
 
   <div class="p-3">
     <div class="flex gap-2">
       <input id="newId" placeholder="Enter friend's LinkUp ID" class="flex-1 bg-[#202c33] rounded-full px-4 py-3">
-      <button onclick="startNew()" class="bg-[#00a884] w-12 h-12 rounded-full text-xl">+</button>
+      <button onclick="startNew()" class="bg-[#00a884] w-12 h-12 rounded-full flex items-center justify-center">
+        <i data-lucide="plus" class="w-6 h-6"></i>
+      </button>
     </div>
   </div>
 
   <div id="chatList" class="flex-1 overflow-y-auto"></div>
 
   <nav class="topbar grid grid-cols-3 py-2 text-center border-t border-[#344047]">
-    <button onclick="showHome()" class="flex flex-col items-center text-[#00a884]"><span>💬</span><span class="text-xs">Chats</span></button>
-    <button onclick="showStatus()" class="flex flex-col items-center"><span>⭕</span><span class="text-xs">Status</span></button>
-    <button onclick="openProfile()" class="flex flex-col items-center"><span>👤</span><span class="text-xs">Profile</span></button>
+    <button onclick="showHome()" id="navChats" class="flex flex-col items-center text-[#00a884]">
+      <i data-lucide="message-circle" class="w-6 h-6"></i>
+      <span class="text-xs">Chats</span>
+    </button>
+    <button onclick="showStatus()" id="navStatus" class="flex flex-col items-center text-gray-400">
+      <i data-lucide="circle" class="w-6 h-6"></i>
+      <span class="text-xs">Status</span>
+    </button>
+    <button onclick="openProfile()" id="navProfile" class="flex flex-col items-center text-gray-400">
+      <i data-lucide="user" class="w-6 h-6"></i>
+      <span class="text-xs">Profile</span>
+    </button>
   </nav>
 </section>
 
 <!-- CHAT SCREEN -->
 <section id="chatScreen" class="hidden h-full flex-col">
   <header class="topbar p-3 flex items-center gap-3">
-    <button onclick="backHome()" class="text-2xl">←</button>
+    <button onclick="backHome()"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
     <div id="chatAvatar" class="avatar w-11 h-11 rounded-full flex items-center justify-center font-bold">A</div>
     <p id="chatWith" class="font-bold flex-1"></p>
   </header>
@@ -59,10 +71,16 @@ body { background: #111b21; color: white; font-family: Arial; }
   <div class="topbar p-2">
     <div class="flex gap-2 items-center">
       <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,.pdf,.doc,.zip" onchange="sendFile(event)">
-      <button onclick="document.getElementById('fileInput').click()" class="text-2xl">📎</button>
+      <button onclick="document.getElementById('fileInput').click()">
+        <i data-lucide="paperclip" class="w-6 h-6"></i>
+      </button>
       <input id="msg" placeholder="Message" class="flex-1 bg-[#2a3942] rounded-full px-4 py-3">
-      <button id="voiceBtn" onmousedown="startRecord()" onmouseup="stopRecord()" class="text-2xl">🎤</button>
-      <button onclick="send()" class="bg-[#00a884] w-11 h-11 rounded-full">➤</button>
+      <button id="voiceBtn" onmousedown="startRecord()" onmouseup="stopRecord()">
+        <i data-lucide="mic" class="w-6 h-6"></i>
+      </button>
+      <button onclick="send()" class="bg-[#00a884] w-11 h-11 rounded-full flex items-center justify-center">
+        <i data-lucide="send" class="w-5 h-5"></i>
+      </button>
     </div>
   </div>
 </section>
@@ -70,7 +88,7 @@ body { background: #111b21; color: white; font-family: Arial; }
 <!-- PROFILE SCREEN -->
 <section id="profileScreen" class="hidden h-full flex-col">
   <header class="topbar p-4 flex items-center gap-3">
-    <button onclick="backHome()" class="text-2xl">←</button>
+    <button onclick="backHome()"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
     <h2 class="text-xl font-bold">Profile</h2>
   </header>
   <div class="p-6">
@@ -88,13 +106,13 @@ body { background: #111b21; color: white; font-family: Arial; }
 <!-- STATUS SCREEN -->
 <section id="statusScreen" class="hidden h-full flex-col">
   <header class="topbar p-4 flex items-center gap-3">
-    <button onclick="backHome()" class="text-2xl">←</button>
+    <button onclick="backHome()"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
     <h2 class="text-xl font-bold">Status</h2>
   </header>
   <div class="p-4">
-    <button onclick="createStatus()" class="w-full bg-[#202c33] p-4 rounded-lg text-left">
-      <b>➕ Add status</b>
-      <p class="text-sm text-gray-400 mt-1">Share a text status</p>
+    <button onclick="createStatus()" class="w-full bg-[#202c33] p-4 rounded-lg text-left flex gap-3">
+      <i data-lucide="plus-circle" class="w-6 h-6"></i>
+      <div><b>Add status</b><p class="text-sm text-gray-400">Share a text status</p></div>
     </button>
     <h3 class="font-bold mt-6 mb-3">Recent updates</h3>
     <div id="statusList"></div>
@@ -123,6 +141,8 @@ let myId = "";
 let currentChat = "";
 let mediaRecorder, audioChunks = [];
 
+lucide.createIcons(); // LOAD ICONS
+
 signInAnonymously(auth);
 onAuthStateChanged(auth, async user => {
   if (!user) return;
@@ -134,7 +154,24 @@ onAuthStateChanged(auth, async user => {
   loadStatuses();
 });
 
-function show(s){ ["homeScreen","chatScreen","profileScreen","statusScreen"].forEach(id=>document.getElementById(id).classList.add("hidden")); document.getElementById(s).classList.remove("hidden"); }
+function show(s){ 
+  ["homeScreen","chatScreen","profileScreen","statusScreen"].forEach(id=>document.getElementById(id).classList.add("hidden")); 
+  document.getElementById(s).classList.remove("hidden"); 
+  lucide.createIcons(); // refresh icons
+  
+  // active nav color
+  document.getElementById("navChats").classList.remove("text-[#00a884]");
+  document.getElementById("navStatus").classList.remove("text-[#00a884]");
+  document.getElementById("navProfile").classList.remove("text-[#00a884]");
+  document.getElementById("navChats").classList.add("text-gray-400");
+  document.getElementById("navStatus").classList.add("text-gray-400");
+  document.getElementById("navProfile").classList.add("text-gray-400");
+  
+  if(s==="homeScreen") document.getElementById("navChats").classList.add("text-[#00a884]");
+  if(s==="statusScreen") document.getElementById("navStatus").classList.add("text-[#00a884]");
+  if(s==="profileScreen") document.getElementById("navProfile").classList.add("text-[#00a884]");
+}
+
 window.showHome = ()=>show("homeScreen");
 window.showStatus = ()=>show("statusScreen");
 window.openProfile = ()=>{show("profileScreen")};
@@ -206,7 +243,6 @@ window.send = ()=>{
   if(t){ push(ref(db, 'chats/'+currentChat), {sender:myId, text:t, type:'text'}); document.getElementById('msg').value = '';}
 }
 
-// SEND FILE/IMAGE AS BASE64
 window.sendFile = (e)=>{
   const file = e.target.files[0];
   const reader = new FileReader();
@@ -216,7 +252,6 @@ window.sendFile = (e)=>{
   reader.readAsDataURL(file);
 }
 
-// VOICE NOTE WITH BASE64
 window.startRecord = async ()=>{
   document.getElementById('voiceBtn').classList.add('recording');
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
