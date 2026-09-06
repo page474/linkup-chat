@@ -13,23 +13,32 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 .back{font-size:24px;cursor:pointer;margin-right:15px}
 .screen{flex:1;overflow-y:auto;display:flex;flex-direction:column}
 
-/* CHATS */
+/* CHAT LIST */
 #chatList{flex:1}
 .chatItem{display:flex;align-items:center;padding:15px;border-bottom:1px solid #1E2A36;cursor:pointer}
 .chatItem:active{background:#121A22}
-.avatar{width:50px;height:50px;border-radius:50%;background:#00BFA6;color:#000;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:12px}
-.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#00BFA6;border:none;font-size:28px;color:#000}
+.avatar{width:50px;height:50px;border-radius:50%;background:#00BFA6;color:#000;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:12px;position:relative;font-size:18px}
+.online{position:absolute;bottom:2px;right:2px;width:12px;height:12px;background:#28d17c;border-radius:50%;border:2px solid #121A22}
+.chatInfo{flex:1;min-width:0}
+.chatName{font-weight:bold;margin-bottom:4px}
+.lastMsg{color:#8A9BA8;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.right{font-size:11px;color:#8A9BA8;text-align:right}
+.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#00BFA6;border:none;font-size:28px;color:#000;box-shadow:0 4px 15px rgba(0,191,166,.4)}
+.empty{text-align:center;color:#71808d;padding:60px 20px}
 
 /* CHAT */
 #messages{flex:1;padding:15px;overflow-y:auto}
 .msg{background:#1E2A36;padding:10px 14px;border-radius:12px;margin-bottom:8px;max-width:75%;width:fit-content}
 .msg.me{background:#00BFA6;color:#000;margin-left:auto}
+.msgBottom{font-size:10px;color:#8FA0AA;text-align:right;margin-top:3px}
+.me .msgBottom{color:#00110d}
+.typing{padding:10px 15px;color:#00BFA6;font-size:12px}
 .inputArea{display:flex;padding:10px;background:#121A22;border-top:1px solid #1E2A36;gap:8px}
 .inputArea input{flex:1;background:#0A0E13;border:1px solid #263442;border-radius:25px;padding:12px 16px;color:#fff;outline:none}
 .inputArea button{width:44px;height:44px;border-radius:50%;background:#00BFA6;border:none;color:#000;font-size:20px}
 
 /* POPUP */
-.popup{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center}
+.popup{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}
 .popupBox{background:#121A22;padding:20px;border-radius:12px;width:90%;max-width:400px}
 .popupBox input{width:100%;padding:14px;background:#0A0E13;border:1px solid #263442;border-radius:8px;color:#fff;margin:15px 0}
 .popupBtn{width:100%;padding:14px;background:#00BFA6;border:none;border-radius:8px;color:#000;font-weight:bold}
@@ -48,8 +57,9 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 <div id="chatScreen" class="screen hidden">
   <div class="header"><div class="back" onclick="backToChats()">←</div><h1 id="chatWithId"></h1></div>
   <div id="messages"></div>
+  <div id="typing" class="typing hidden">typing...</div>
   <div class="inputArea">
-    <input id="msgInput" type="text" placeholder="Type message..." onkeypress="if(event.key==='Enter') sendMsg()">
+    <input id="msgInput" type="text" placeholder="Type message..." oninput="setTyping()" onkeypress="if(event.key==='Enter') sendMsg()">
     <button onclick="sendMsg()">➤</button>
   </div>
 </div>
@@ -67,16 +77,12 @@ body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:colu
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
-  authDomain: "linkup-chat-3fdd5.firebaseapp.com",
   databaseURL: "https://linkup-chat-3fdd5-default-rtdb.firebaseio.com",
   projectId: "linkup-chat-3fdd5",
-  storageBucket: "linkup-chat-3fdd5.firebasestorage.app",
-  messagingSenderId: "177573067619",
-  appId: "1:177573067619:web:40e64ae330bb86200e7156"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -85,33 +91,50 @@ const db = getDatabase(app);
 let myId = localStorage.getItem('linkupId') || "LNK-" + Math.floor(100000 + Math.random() * 900000);
 localStorage.setItem('linkupId', myId);
 let currentChat = "";
+let typingTimeout;
 
 document.getElementById('myId').innerText = myId;
+set(ref(db, 'users/' + myId), { online: true, lastSeen: Date.now() });
+window.addEventListener('beforeunload', ()=> set(ref(db, 'users/' + myId + '/online'), false));
+
+loadChats();
 
 window.showNewChat = () => document.getElementById('newChatPopup').classList.remove('hidden');
 window.hideNewChat = () => document.getElementById('newChatPopup').classList.add('hidden');
 
 window.startChat = () => {
   const fid = document.getElementById('friendIdInput').value.toUpperCase();
-  if(!fid) return alert("Enter ID");
+  if(!fid || fid === myId) return alert("Enter valid ID");
   currentChat = [myId, fid].sort().join('_');
   document.getElementById('chatWithId').innerText = fid;
   document.getElementById('chatsScreen').classList.add('hidden');
   document.getElementById('chatScreen').classList.remove('hidden');
   hideNewChat();
   loadMessages();
+  watchTyping(fid);
+  update(ref(db, 'chatList/' + myId + '/' + fid), { lastTime: Date.now() });
+  update(ref(db, 'chatList/' + fid + '/' + myId), { lastTime: Date.now() });
 }
 
 window.backToChats = () => {
   document.getElementById('chatScreen').classList.add('hidden');
   document.getElementById('chatsScreen').classList.remove('hidden');
+  loadChats();
 }
 
 window.sendMsg = () => {
   const text = document.getElementById('msgInput').value;
   if(!text) return;
-  push(ref(db, 'chats/' + currentChat), { sender: myId, text, time: Date.now() });
+  const msgData = { sender: myId, text, time: Date.now(), seen: false };
+  push(ref(db, 'chats/' + currentChat), msgData);
+  set(ref(db, 'typing/' + currentChat + '/' + myId), false);
   document.getElementById('msgInput').value = "";
+}
+
+window.setTyping = () => {
+  set(ref(db, 'typing/' + currentChat + '/' + myId), true);
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(()=> set(ref(db, 'typing/' + currentChat + '/' + myId), false), 2000);
 }
 
 function loadMessages() {
@@ -122,10 +145,50 @@ function loadMessages() {
     if(msgs) Object.values(msgs).forEach(m => {
       const div = document.createElement('div');
       div.className = 'msg ' + (m.sender === myId ? 'me' : '');
-      div.innerText = m.text;
+      div.innerHTML = `${m.text}<div class="msgBottom">${new Date(m.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} ${m.sender===myId?'✓':''}</div>`;
       box.appendChild(div);
     });
     box.scrollTop = box.scrollHeight;
+  });
+}
+
+function watchTyping(fid) {
+  onValue(ref(db, 'typing/' + currentChat + '/' + fid), snap => {
+    document.getElementById('typing').classList.toggle('hidden', !snap.val());
+  });
+}
+
+function loadChats() {
+  onValue(ref(db, 'chatList/' + myId), snap => {
+    const chats = snap.val();
+    const list = document.getElementById('chatList');
+    list.innerHTML = "";
+    if(!chats) {
+      list.innerHTML = `<div class="empty">💬<br>No chats yet<br>Tap + to start</div>`;
+      return;
+    }
+    
+    Object.keys(chats).sort((a,b)=> chats[b].lastTime - chats[a].lastTime).forEach(fid => {
+      const chatId = [myId, fid].sort().join('_');
+      onValue(ref(db, 'chats/' + chatId), msgSnap => {
+        const msgs = msgSnap.val();
+        const lastMsg = msgs ? Object.values(msgs).pop() : {text:"No messages yet"};
+        const time = chats[fid].lastTime ? new Date(chats[fid].lastTime).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : "";
+        
+        const div = document.createElement('div');
+        div.className = 'chatItem';
+        div.onclick = () => { document.getElementById('friendIdInput').value = fid; startChat(); }
+        div.innerHTML = `
+          <div class="avatar">${fid[4]}<div class="online"></div></div>
+          <div class="chatInfo">
+            <div class="chatName">${fid}</div>
+            <div class="lastMsg">${lastMsg.text}</div>
+          </div>
+          <div class="right">${time}</div>
+        `;
+        list.appendChild(div);
+      }, {onlyOnce: true});
+    });
   });
 }
 </script>
