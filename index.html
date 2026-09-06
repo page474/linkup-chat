@@ -4,220 +4,122 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LinkUp Chat</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,Helvetica,sans-serif;background:#d9dbd5;height:100vh;overflow:hidden}
-.app{width:100%;height:100vh;display:flex;background:#fff}
-.sidebar{width:360px;border-right:1px solid #ddd;background:#fff;display:flex;flex-direction:column}
-.sidebar-header{height:65px;background:#f0f2f5;display:flex;align-items:center;justify-content:space-between;padding:10px 16px}
-.profile{display:flex;align-items:center;gap:10px;cursor:pointer}
-.avatar{width:45px;height:45px;border-radius:50%;object-fit:cover;background:#25d366;color:white;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px}
-.header-buttons{display:flex;gap:20px}
-.icon-btn{border:none;background:transparent;font-size:21px;cursor:pointer}
-.search{padding:8px 12px;background:#fff}
-.search input{width:100%;border:none;outline:none;background:#f0f2f5;padding:12px 15px;border-radius:8px;font-size:14px}
-.chat-list{overflow-y:auto;flex:1}
-.chat{display:flex;align-items:center;gap:12px;padding:12px 15px;cursor:pointer;border-bottom:1px solid #f0f0f0}
-.chat:hover{background:#f5f5f5}
-.chat-info{flex:1;min-width:0}
-.chat-top{display:flex;justify-content:space-between;margin-bottom:5px}
-.chat-name{font-size:16px;font-weight:500}
-.time{font-size:12px;color:#667781}
-.preview{color:#667781;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chat-area{flex:1;display:flex;flex-direction:column;background:#efeae2}
-.chat-header{height:65px;background:#f0f2f5;display:flex;align-items:center;padding:8px 16px;gap:12px}
-.chat-header-info{flex:1}
-.chat-header-info h3{font-size:16px}
-.status{color:#667781;font-size:13px;margin-top:3px}
-.messages{flex:1;overflow-y:auto;padding:25px 7%;display:flex;flex-direction:column;gap:8px;background:url('https://i.imgur.com/9cR4X2G.png')}
-.message{max-width:65%;padding:8px 10px;border-radius:8px;font-size:14px;line-height:1.4;position:relative}
-.received{background:white;align-self:flex-start}
-.sent{background:#d9fdd3;align-self:flex-end}
-.message-meta{font-size:11px;color:#667781;float:right;margin-left:12px;margin-top:4px}
-.ticks{color:#53bdeb;margin-left:3px}
-.message-box{min-height:65px;background:#f0f2f5;display:flex;align-items:center;gap:10px;padding:10px 16px}
-.message-box input{flex:1;border:none;outline:none;background:white;border-radius:25px;padding:13px 18px;font-size:15px}
-.send{width:45px;height:45px;border:none;border-radius:50%;background:#25d366;color:white;cursor:pointer;font-size:20px}
-.dark{background:#111b21}
-.dark.sidebar,.dark.chat-list{background:#111b21}
-.dark.sidebar-header,.dark.chat-header,.dark.message-box{background:#202c33;color:white}
-.dark.chat{border-color:#26343b;color:white}
-.dark.chat:hover{background:#202c33}
-.dark.chat-name{color:white}
-.dark.preview,.dark.time,.dark.status{color:#8696a0}
-.dark.search{background:#111b21}
-.dark.search input,.dark.message-box input{background:#202c33;color:white}
-.dark.chat-area{background:#0b141a}
-.dark.received{background:#202c33;color:white}
-.dark.sent{background:#005c4b;color:white}
-@media (max-width:700px){.sidebar{width:100%}.chat-area{display:none}.app.mobile-chat.sidebar{display:none}.app.mobile-chat.chat-area{display:flex;width:100%}.back{display:block!important}}
-.back{display:none;border:none;background:transparent;font-size:24px;cursor:pointer}
-.login-screen{position:fixed;inset:0;background:#fff;z-index:999;display:grid;place-items:center}
-.login-box{width:90%;max-width:400px;text-align:center}
-.login-box h1{color:#25d366;margin-bottom:20px;font-size:32px}
-.login-box input{width:100%;padding:14px;border:1px solid #ddd;border-radius:8px;margin:10px 0;font-size:16px}
-.login-box button{width:100%;padding:14px;background:#25d366;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer}
-#avatarUpload{display:none}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+body { background: #f0f2f5; }
+body.dark { background: #111b21; color: #e9edef; }
+.container { max-width: 600px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; }
+.login { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; padding: 20px; gap: 15px; }
+.login h1 { color: #25D366; font-size: 36px; }
+.login input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+.btn { background: #25D366; color: white; border: none; padding: 14px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; font-size: 16px; }
+.chat-list, .chat-screen { display: none; flex: 1; flex-direction: column; }
+.header { background: #128C7E; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+.chat-item { padding: 15px; border-bottom: 1px solid #e9edef; cursor: pointer; }
+.messages { flex: 1; overflow-y: auto; padding: 15px; background: #e5ddd5; }
+.msg { background: white; padding: 8px 12px; margin: 8px 0; border-radius: 8px; max-width: 75%; }
+.msg.me { background: #d9fdd3; margin-left: auto; }
+.input-area { display: flex; padding: 10px; background: white; gap: 8px; }
+.input-area input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 20px; }
 </style>
 </head>
 <body>
-<input type="file" id="avatarUpload" accept="image/*">
-<div class="login-screen" id="loginScreen">
-  <div class="login-box">
+<div class="container">
+  <div class="login" id="login">
     <h1>LinkUp Chat</h1>
-    <p>Enter your name to start</p>
-    <input type="text" id="userName" placeholder="Your Name">
-    <button onclick="login()">Start Chatting</button>
+    <p>Real-time chat with Firebase</p>
+    <input type="text" id="nameInput" placeholder="Enter your name">
+    <button class="btn" onclick="startApp()">Start Chatting</button>
+  </div>
+
+  <div class="chat-list" id="chatList">
+    <div class="header">
+      <h2>LinkUp</h2>
+      <button onclick="logout()" style="background:none;border:none;color:white;">Logout</button>
+    </div>
+    <div style="padding:10px;">
+      <input type="text" id="newChatName" placeholder="Friend's name" style="width:70%; padding:10px;">
+      <button class="btn" onclick="newChat()" style="width:28%;">New Chat</button>
+    </div>
+    <div id="chats"></div>
+  </div>
+
+  <div class="chat-screen" id="chatScreen">
+    <div class="header">
+      <button onclick="backToList()" style="background:none;border:none;color:white;font-size:20px;">←</button>
+      <h3 id="chatWith"></h3>
+      <div></div>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <input type="text" id="msgInput" placeholder="Type a message" onkeypress="if(event.key==='Enter') sendMsg()">
+      <button class="btn" onclick="sendMsg()" style="width:80px;">Send</button>
+    </div>
   </div>
 </div>
-<div class="app" id="app" style="display:none">
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="profile" onclick="document.getElementById('avatarUpload').click()">
-                <img class="avatar" id="myAvatar" src="https://ui-avatars.com/api/?name=L&background=25d366&color=fff&size=90">
-                <strong id="myName">LinkUp</strong>
-            </div>
-            <div class="header-buttons">
-                <button class="icon-btn" onclick="newChat()">＋</button>
-                <button class="icon-btn" onclick="toggleDark()">🌙</button>
-            </div>
-        </div>
-        <div class="search">
-            <input type="text" id="searchInput" placeholder="Search or start new chat" oninput="searchChats()">
-        </div>
-        <div class="chat-list" id="chatList"></div>
-    </aside>
-    <main class="chat-area">
-        <header class="chat-header">
-            <button class="back" onclick="goBack()">←</button>
-            <img class="avatar" id="chatAvatar" src="https://ui-avatars.com/api/?name=J&background=25d366&color=fff&size=90">
-            <div class="chat-header-info">
-                <h3 id="chatName">Select a chat</h3>
-                <div class="status" id="chatStatus">online</div>
-            </div>
-        </header>
-        <section class="messages" id="messages"></section>
-        <footer class="message-box">
-            <input type="text" id="messageInput" placeholder="Type a message" onkeydown="handleEnter(event)">
-            <button class="send" onclick="sendMessage()">➤</button>
-        </footer>
-    </main>
-</div>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+<script>
+// YOUR FIREBASE CONFIG FROM SCREENSHOT
 const firebaseConfig = {
-  apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
-  authDomain: "linkup-chat-3fdd5.firebaseapp.com",
-  projectId: "linkup-chat-3fdd5",
-  storageBucket: "linkup-chat-3fdd5.firebasestorage.app",
-  messagingSenderId: "177573067619",
-  appId: "1:177573067619:web:40e64ae330bb86200e7156"
+  apiKey: "AIzaSyDyHqEncYDaQs", // COPY FULL ONE FROM YOUR SCREENSHOT
+  authDomain: "linkup-chat-3fd.firebaseapp.com",
+  databaseURL: "https://linkup-chat-3fd-default-rtdb.firebaseio.com",
+  projectId: "Linkup-chat-3fdd"
 };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-let currentUser = "";
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let myName = "";
 let currentChat = "";
-let unsubscribe = null;
-let userAvatars = {};
-window.login = function(){
-  const name = document.getElementById("userName").value.trim();
-  if(!name) return alert("Enter your name");
-  currentUser = name;
-  document.getElementById("myName").textContent = name;
-  const savedAvatar = localStorage.getItem('avatar_'+name);
-  if(savedAvatar) document.getElementById("myAvatar").src = savedAvatar;
-  else document.getElementById("myAvatar").src = `https://ui-avatars.com/api/?name=${name}&background=25d366&color=fff&size=90`;
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("app").style.display = "flex";
-  loadChats();
+
+function startApp() {
+  myName = document.getElementById('nameInput').value.trim();
+  if(!myName) return alert("Enter your name");
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('chatList').style.display = 'flex';
 }
-document.getElementById('avatarUpload').addEventListener('change', async function(e){
-  const file = e.target.files[0];
-  if(!file) return;
-  const formData = new FormData();
-  formData.append('image', file);
-  const res = await fetch('https://api.imgur.com/3/image', {
-    method: 'POST',
-    headers: { 'Authorization': 'Client-ID 546c25a59c58ad7' },
-    body: formData
-  });
-  const data = await res.json();
-  if(data.success){
-    const url = data.data.link;
-    document.getElementById("myAvatar").src = url;
-    localStorage.setItem('avatar_'+currentUser, url);
-    await setDoc(doc(db, "users", currentUser), {avatar: url}, {merge:true});
-  }
-});
-function loadChats(){
-  const q = query(collection(db, "chats"), orderBy("lastTime","desc"));
-  onSnapshot(q, snapshot=>{
-    const chatList = document.getElementById("chatList");
-    chatList.innerHTML = "";
-    snapshot.forEach(docSnap=>{
-      const data = docSnap.data();
-      const chatId = docSnap.id;
-      const users = data.users || [];
-      const chatName = users.find(u => u!== currentUser) || chatId;
-      if(!users.includes(currentUser)) return;
-      const avatar = userAvatars[chatName] || `https://ui-avatars.com/api/?name=${chatName}&background=25d366&color=fff&size=90`;
-      const chatDiv = document.createElement("div");
-      chatDiv.className = "chat";
-      chatDiv.onclick = () => openChat(chatName, chatId);
-      const time = data.lastTime? new Date(data.lastTime.toDate()).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}) : "";
-      chatDiv.innerHTML = `<img class="avatar" src="${avatar}"><div class="chat-info"><div class="chat-top"><span class="chat-name">${chatName}</span><span class="time">${time}</span></div><div class="preview">${data.lastMsg || "Start chatting"}</div></div>`;
-      chatList.appendChild(chatDiv);
+
+function newChat() {
+  let friend = document.getElementById('newChatName').value.trim();
+  if(!friend) return alert("Enter friend name");
+  currentChat = [myName, friend].sort().join('_');
+  openChat(friend);
+  document.getElementById('newChatName').value = '';
+}
+
+function openChat(friend) {
+  document.getElementById('chatList').style.display = 'none';
+  document.getElementById('chatScreen').style.display = 'flex';
+  document.getElementById('chatWith').innerText = friend;
+  
+  db.ref('chats/' + currentChat).on('value', snap => {
+    let msgs = [];
+    snap.forEach(child => msgs.push(child.val()));
+    let html = '';
+    msgs.forEach(m => {
+      html += `<div class="msg ${m.from === myName ? 'me' : ''}"><b>${m.from}:</b> ${m.text}</div>`;
     });
-  });
-  onSnapshot(collection(db, "users"), snap=>{ snap.forEach(d=>{ userAvatars[d.id] = d.data().avatar; }); });
-}
-async function openChat(name, chatId){
-  currentChat = chatId;
-  document.getElementById("chatName").textContent = name;
-  document.getElementById("chatAvatar").src = userAvatars[name] || `https://ui-avatars.com/api/?name=${name}&background=25d366&color=fff&size=90`;
-  document.getElementById("app").classList.add("mobile-chat");
-  if(unsubscribe) unsubscribe();
-  const q = query(collection(db, "chats", chatId, "messages"), orderBy("time"));
-  unsubscribe = onSnapshot(q, snapshot=>{
-    const messages = document.getElementById("messages");
-    messages.innerHTML = "";
-    snapshot.forEach(docSnap=>{
-      const msg = docSnap.data();
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "message " + (msg.sender === currentUser? "sent" : "received");
-      const time = msg.time? new Date(msg.time.toDate()).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}) : "";
-      msgDiv.innerHTML = `${msg.text}<span class="message-meta">${time} ${msg.sender === currentUser? '<span class="ticks">✓✓</span>' : ''}</span>`;
-      messages.appendChild(msgDiv);
-    });
-    messages.scrollTop = messages.scrollHeight;
+    document.getElementById('messages').innerHTML = html;
+    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
   });
 }
-window.sendMessage = async function(){
-  const input = document.getElementById("messageInput");
-  const text = input.value.trim();
-  if(!text ||!currentChat) return;
-  await addDoc(collection(db, "chats", currentChat, "messages"), {text: text, sender: currentUser, time: serverTimestamp()});
-  await setDoc(doc(db, "chats", currentChat), {lastMsg: text, lastTime: serverTimestamp()},{merge:true});
-  input.value = "";
+
+function sendMsg() {
+  let text = document.getElementById('msgInput').value.trim();
+  if(!text) return;
+  db.ref('chats/' + currentChat).push({from: myName, text: text, time: Date.now()});
+  document.getElementById('msgInput').value = '';
 }
-window.handleEnter = function(event){ if(event.key === "Enter"){ sendMessage(); }
-window.newChat = async function(){
-  const name = prompt("Enter contact name:");
-  if(!name) return;
-  const chatId = [currentUser, name].sort().join("-");
-  await setDoc(doc(db, "chats", chatId), {users: [currentUser, name], lastMsg: "", lastTime: serverTimestamp()},{merge:true});
-  openChat(name, chatId);
+
+function backToList() {
+  db.ref('chats/' + currentChat).off();
+  document.getElementById('chatScreen').style.display = 'none';
+  document.getElementById('chatList').style.display = 'flex';
 }
-window.toggleDark = function(){ document.body.classList.toggle("dark"); }
-window.goBack = function(){ document.getElementById("app").classList.remove("mobile-chat"); }
-window.searchChats = function(){
-  const query = document.getElementById("searchInput").value.toLowerCase();
-  document.querySelectorAll(".chat").forEach(chat=>{
-    const name = chat.querySelector(".chat-name").textContent.toLowerCase();
-    chat.style.display = name.includes(query)? "flex" : "none";
-  });
-}
+
+function logout() { location.reload(); }
 </script>
 </body>
-              </html>
+</html>
