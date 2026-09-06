@@ -13,6 +13,8 @@ body { background: #111b21; color: white; font-family: Arial; }
 .them { background: #202c33; }
 .chat-img { max-width: 260px; border-radius: 8px; }
 .avatar { background: linear-gradient(135deg,#7c3aed,#2563eb); }
+.recording { animation: pulse 1s infinite; }
+@keyframes pulse { 50% { transform: scale(1.1); } }
 </style>
 </head>
 <body>
@@ -50,16 +52,16 @@ body { background: #111b21; color: white; font-family: Arial; }
     <button onclick="backHome()" class="text-2xl">←</button>
     <div id="chatAvatar" class="avatar w-11 h-11 rounded-full flex items-center justify-center font-bold">A</div>
     <p id="chatWith" class="font-bold flex-1"></p>
-    <button onclick="toast('Calls need extra setup')" class="text-xl">📞</button>
   </header>
 
   <main id="msgs" class="flex-1 overflow-y-auto p-3 space-y-2"></main>
 
   <div class="topbar p-2">
     <div class="flex gap-2 items-center">
-      <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,.pdf,.doc" onchange="sendFile(event)">
+      <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,.pdf,.doc,.zip" onchange="sendFile(event)">
       <button onclick="document.getElementById('fileInput').click()" class="text-2xl">📎</button>
       <input id="msg" placeholder="Message" class="flex-1 bg-[#2a3942] rounded-full px-4 py-3">
+      <button id="voiceBtn" onmousedown="startRecord()" onmouseup="stopRecord()" class="text-2xl">🎤</button>
       <button onclick="send()" class="bg-[#00a884] w-11 h-11 rounded-full">➤</button>
     </div>
   </div>
@@ -119,17 +121,17 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 let myId = "";
 let currentChat = "";
-let currentFriend = "";
+let mediaRecorder, audioChunks = [];
 
 signInAnonymously(auth);
 onAuthStateChanged(auth, async user => {
   if (!user) return;
   myId = "LinkUp_" + user.uid.substring(0, 8).toUpperCase();
-  localStorage.setItem("linkup_id", myId);
   document.getElementById("myIdSmall").innerText = myId;
   document.getElementById("profileId").innerText = myId;
   loadChats();
   loadProfile();
+  loadStatuses();
 });
 
 function show(s){ ["homeScreen","chatScreen","profileScreen","statusScreen"].forEach(id=>document.getElementById(id).classList.add("hidden")); document.getElementById(s).classList.remove("hidden"); }
@@ -151,7 +153,7 @@ window.saveProfile = ()=>{
     id: myId, name: document.getElementById("profileName").value,
     about: document.getElementById("profileAbout").value
   });
-  toast("Profile Saved");
+  alert("Profile Saved");
   backHome();
 }
 
@@ -162,7 +164,7 @@ function loadChats(){
       const d = child.val();
       const div = document.createElement("div");
       div.className = "flex items-center gap-3 p-3 hover:bg-[#202c33] cursor-pointer";
-      div.innerHTML = `<div class="avatar w-12 h-12 rounded-full flex items-center justify-center">${(d.name||"?")[0]}</div><div><p class="font-semibold">${d.name}</p><p class="text-sm text-gray-400">${d.lastMsg||""}</p></div>`;
+      div.innerHTML = `<div class="avatar w-12 h-12 rounded-full flex items-center justify-center">${(d.name||"?")[0]}</div><div class="flex-1"><p class="font-semibold">${d.name}</p><p class="text-sm text-gray-400 truncate">${d.lastMsg||""}</p></div>`;
       div.onclick = ()=>openChat(d.id, d.name);
       list.appendChild(div);
     });
@@ -171,13 +173,12 @@ function loadChats(){
 
 window.startNew = async ()=>{
   const fid = document.getElementById("newId").value.trim();
-  if(!fid) return toast("Enter ID");
+  if(!fid) return alert("Enter ID");
   const snap = await get(ref(db, "users/"+fid));
   openChat(fid, snap.exists()? snap.val().name : fid);
 }
 
 function openChat(fid, name){
-  currentFriend = fid;
   currentChat = [myId, fid].sort().join("_");
   show("chatScreen");
   document.getElementById("chatWith").innerText = name;
@@ -189,11 +190,14 @@ function openChat(fid, name){
     const m = s.val();
     const d = document.createElement('div');
     d.className = m.sender === myId? 'text-right' : 'text-left';
-    let content = m.type === 'image'? `<img src="${m.url}" class="chat-img"/>` : `<div class="inline-block ${m.sender === myId? 'me' : 'them'} px-3 py-2 rounded-lg max-w-xs">${m.text}</div>`;
+    let content = '';
+    if(m.type === 'image') content = `<img src="${m.url}" class="chat-img"/>`;
+    else if(m.type === 'audio') content = `<audio controls src="${m.url}"></audio>`;
+    else content = `<div class="inline-block ${m.sender === myId? 'me' : 'them'} px-3 py-2 rounded-lg max-w-xs">${m.text}</div>`;
     d.innerHTML = content;
     document.getElementById('msgs').appendChild(d);
     document.getElementById('msgs').scrollTop = 99999;
-    set(ref(db, 'users/' + myId + '/chats/' + fid + '/lastMsg'), m.type === 'image'? '📷 Photo' : m.text);
+    set(ref(db, 'users/' + myId + '/chats/' + fid + '/lastMsg'), m.type === 'image'? '📷 Photo' : m.type === 'audio'? '🎤 Voice' : m.text);
   });
 }
 
@@ -202,7 +206,7 @@ window.send = ()=>{
   if(t){ push(ref(db, 'chats/'+currentChat), {sender:myId, text:t, type:'text'}); document.getElementById('msg').value = '';}
 }
 
-// SEND FILE AS BASE64 - NO STORAGE NEEDED
+// SEND FILE/IMAGE AS BASE64
 window.sendFile = (e)=>{
   const file = e.target.files[0];
   const reader = new FileReader();
@@ -212,9 +216,31 @@ window.sendFile = (e)=>{
   reader.readAsDataURL(file);
 }
 
+// VOICE NOTE WITH BASE64
+window.startRecord = async ()=>{
+  document.getElementById('voiceBtn').classList.add('recording');
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  mediaRecorder = new MediaRecorder(stream);
+  audioChunks = [];
+  mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+  mediaRecorder.start();
+}
+window.stopRecord = ()=>{
+  document.getElementById('voiceBtn').classList.remove('recording');
+  mediaRecorder.stop();
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onloadend = () => {
+      push(ref(db, 'chats/'+currentChat), {sender: myId, type: 'audio', url: reader.result});
+    }
+  }
+}
+
 window.createStatus = ()=>{
   const status = prompt("Enter your status:");
-  if(status) set(ref(db, "status/"+myId), {text: status, time: Date.now()});
+  if(status) set(ref(db, "status/"+myId), {text: status, time: Date.now(), name: document.getElementById("profileName").value});
   loadStatuses();
 }
 
@@ -223,12 +249,10 @@ function loadStatuses(){
     const list = document.getElementById("statusList"); list.innerHTML="";
     snap.forEach(child=>{
       const d = child.val();
-      list.innerHTML += `<div class="bg-[#202c33] p-3 rounded-lg mb-2">${d.text}</div>`;
+      list.innerHTML += `<div class="bg-[#202c33] p-3 rounded-lg mb-2"><b>${d.name}</b><p>${d.text}</p></div>`;
     });
   });
 }
-
-window.toast = (msg)=>{alert(msg)};
 </script>
 </body>
 </html>
