@@ -13,6 +13,7 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
 body{background:#111b21;color:white;height:100vh;overflow:hidden}
 button,input{font:inherit}
+button:disabled{opacity:0.5;cursor:not-allowed}
 .hidden{display:none!important}
 
 /* AUTH */
@@ -26,6 +27,7 @@ button,input{font:inherit}
 .country{width:100px}
 .phone{flex:1}
 .button{width:100%;padding:14px;border:0;border-radius:8px;background:#25d366;color:#071b12;font-weight:bold;cursor:pointer}
+.button:active{transform:scale(0.98)}
 .small-text{text-align:center;color:#8696a0;font-size:12px;line-height:18px;margin-top:15px}
 .error{color:#ff6b6b;font-size:13px;margin-bottom:12px;text-align:center}
 
@@ -111,7 +113,7 @@ button,input{font:inherit}
 <input class="input country" id="countryCode" value="+234" placeholder="+234">
 <input class="input phone" id="phoneNumber" type="tel" placeholder="8012345678">
 </div>
-<button class="button" onclick="sendVerificationCode()">Send verification code</button>
+<button class="button" id="sendBtn" onclick="sendVerificationCode()">Send verification code</button>
 <div class="small-text">You will receive an SMS with a verification code.</div>
 </div>
 
@@ -165,7 +167,7 @@ button,input{font:inherit}
 <h2>Start new chat</h2>
 <input id="recipientPhone" type="tel" placeholder="+2348012345678">
 <div style="color:#8696a0;font-size:12px;line-height:18px;margin-bottom:15px">
-Enter the person's verified LinkUp phone number. They don't need to add you first.
+Enter the person's verified LinkUp phone number.
 </div>
 <div class="modal-buttons">
 <button class="cancel" onclick="closeNewChat()">Cancel</button>
@@ -209,22 +211,30 @@ return country + phone;
 }
 function cleanPhone(phone){ return phone.replace(/[^0-9]/g, ""); }
 
-/* RECAPTCHA */
+/* RECAPTCHA - FIXED */
 function setupRecaptcha(){
-if(recaptchaVerifier) return;
+if(recaptchaVerifier) recaptchaVerifier.clear();
+document.getElementById("recaptcha-container").innerHTML = "";
 recaptchaVerifier = new firebase.auth.RecaptchaVerifier("recaptcha-container", {
 size:"invisible",
-callback:function(){ console.log("reCAPTCHA verified"); }
+callback:function(){ console.log("reCAPTCHA ready"); },
+'expired-callback': function() { recaptchaVerifier.clear(); }
 });
 recaptchaVerifier.render();
 }
 
-/* SEND SMS */
+/* SEND SMS - FIXED */
 async function sendVerificationCode(){
 clearErrors();
+const btn = document.getElementById("sendBtn");
+btn.disabled = true;
+btn.innerText = "Sending...";
+
 const phone = normalizePhone();
 if(phone.length < 10){
 document.getElementById("phoneError").innerText = "Enter a valid phone number.";
+btn.disabled = false;
+btn.innerText = "Send verification code";
 return;
 }
 try{
@@ -235,6 +245,9 @@ document.getElementById("codeStep").classList.remove("hidden");
 }catch(error){
 console.error(error);
 document.getElementById("phoneError").innerText = firebaseError(error.code);
+btn.disabled = false;
+btn.innerText = "Send verification code";
+if(recaptchaVerifier) recaptchaVerifier.clear();
 }
 }
 
@@ -411,7 +424,7 @@ const isSent = msg.sender === currentUser.uid;
 const msgDiv = document.createElement("div");
 msgDiv.className = "message " + (isSent ? "sent" : "received");
 const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
-msgDiv.innerHTML = `${msg.text}<span class="message-time">${time} ${isSent ? '<span class="check">✓✓</span>' : ''}</span>`;
+msgDiv.innerHTML = `${msg.text}<span class="message-time">${time} ${isSent ? '<span class="check">✓</span>' : ''}</span>`;
 container.appendChild(msgDiv);
 container.scrollTop = container.scrollHeight;
 });
@@ -479,7 +492,9 @@ function firebaseError(code){
 switch(code){
 case "auth/invalid-phone-number": return "Invalid phone number.";
 case "auth/too-many-requests": return "Too many attempts. Try again later.";
+case "auth/unauthorized-domain": return "Add this domain to Firebase Authorized domains.";
 default: return "Something went wrong. Try again.";
+}
 }
 </script>
 </body>
