@@ -1,115 +1,1206 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LinkUp</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Roboto,Arial,sans-serif}
-body{background:#0A0E13;color:#fff;height:100vh;display:flex;flex-direction:column}
-.hidden{display:none!important}
-.header{background:#121A22;padding:15px 20px;display:flex;align-items:center;border-bottom:1px solid #1E2A36}
-.header h1{flex:1;color:#00BFA6;font-size:20px}
-.back{font-size:24px;cursor:pointer;margin-right:15px;display:flex;align-items:center}
-.headerBtn{font-size:22px;padding:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.headerBtn svg,.back svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.screen{flex:1;overflow-y:auto;display:flex;flex-direction:column}
-.authBox{margin:auto;text-align:center;padding:40px 20px;width:100%;max-width:400px}
-.authBox input{width:100%;padding:14px;background:#121A22;border:1px solid #263442;border-radius:8px;color:#fff;margin-bottom:15px}
-.authBtn{width:100%;padding:14px;background:#00BFA6;border:none;border-radius:8px;color:#000;font-weight:bold}
-#chatList{flex:1}
-.chatItem{display:flex;align-items:center;padding:15px;border-bottom:1px solid #1E2A36;cursor:pointer}
-.chatItem.starred{border-left:4px solid #FFD700}
-.avatar{width:50px;height:50px;border-radius:50%;background:#00BFA6;color:#000;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:12px;font-size:18px}
-.chatInfo{flex:1;min-width:0}
-.chatName{font-weight:bold;margin-bottom:4px}
-.lastMsg{color:#8A9BA8;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:50%;background:#00BFA6;border:none;color:#000;display:flex;align-items:center;justify-content:center}
-.fab svg{width:27px;height:27px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.empty{text-align:center;color:#71808d;padding:60px 20px}
-#messages{flex:1;padding:15px;overflow-y:auto}
-.msg{background:#1E2A36;padding:10px 14px;border-radius:12px;margin-bottom:8px;max-width:75%;width:fit-content}
-.msg.me{background:#00BFA6;color:#000;margin-left:auto}
-.msgBottom{font-size:10px;color:#8FA0AA;text-align:right;margin-top:3px}
-.me.msgBottom{color:#00110d}
-.blockedBanner{background:#5e2a2a;color:#ff8080;padding:10px;text-align:center;font-size:14px}
-.inputArea{display:flex;padding:10px;background:#121A22;border-top:1px solid #1E2A36;gap:8px}
-.inputArea input{flex:1;background:#0A0E13;border:1px solid #263442;border-radius:25px;padding:12px 16px;color:#fff;outline:none}
-.inputArea button{width:44px;height:44px;border-radius:50%;background:#00BFA6;border:none;color:#000;display:flex;align-items:center;justify-content:center}
-.inputArea button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.inputArea.disabled{opacity:0.5;pointer-events:none}
-.settingItem{display:flex;align-items:center;padding:15px;border-bottom:1px solid #1E2A36;cursor:pointer}
-.settingIcon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:15px}
-.settingIcon svg{width:21px;height:21px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.settingInfo{flex:1}
-.settingTitle{font-size:16px;margin-bottom:3px}
-.settingDesc{font-size:12px;color:#8A9BA8}
-.profileBox{background:#121A22;padding:20px;display:flex;align-items:center;border-bottom:1px solid #1E2A36}
-.profileAvatar{width:60px;height:60px;border-radius:50%;background:#00BFA6;color:#000;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;margin-right:15px}
-.popup{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100}
-.popupBox{background:#121A22;padding:20px;border-radius:12px;width:90%;max-width:400px;max-height:70vh;overflow-y:auto}
-.popupBtn{width:100%;padding:14px;background:#00BFA6;border:none;border-radius:8px;color:#000;font-weight:bold;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px}
-.popupBtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.danger{background:#d32f2f!important;color:#fff!important}
-.menu{position:absolute;top:50px;right:10px;background:#1E2A36;border-radius:8px;z-index:50;min-width:180px}
-.menuItem{padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:10px}
-.menuItem:hover{background:#263442}
-.menuItem svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.checkbox{margin-right:10px}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#111b21;
+    color:white;
+    height:100vh;
+    overflow:hidden;
+}
+
+button,input{
+    font:inherit;
+}
+
+.hidden{
+    display:none!important;
+}
+
+/* AUTH */
+
+.auth-screen{
+    position:fixed;
+    inset:0;
+    background:#111b21;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+}
+
+.auth-box{
+    width:92%;
+    max-width:420px;
+    background:#202c33;
+    padding:30px;
+    border-radius:15px;
+}
+
+.logo{
+    text-align:center;
+    color:#25d366;
+    font-size:34px;
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#8696a0;
+    margin-bottom:25px;
+    font-size:14px;
+}
+
+.auth-title{
+    text-align:center;
+    margin-bottom:18px;
+}
+
+.input{
+    width:100%;
+    padding:14px;
+    border:0;
+    outline:0;
+    border-radius:8px;
+    background:#2a3942;
+    color:white;
+    margin-bottom:12px;
+}
+
+.country-row{
+    display:flex;
+    gap:8px;
+}
+
+.country{
+    width:100px;
+}
+
+.phone{
+    flex:1;
+}
+
+.button{
+    width:100%;
+    padding:14px;
+    border:0;
+    border-radius:8px;
+    background:#25d366;
+    color:#071b12;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.small-text{
+    text-align:center;
+    color:#8696a0;
+    font-size:12px;
+    line-height:18px;
+    margin-top:15px;
+}
+
+.error{
+    color:#ff6b6b;
+    font-size:13px;
+    margin-bottom:12px;
+    text-align:center;
+}
+
+/* APP */
+
+.app{
+    width:100%;
+    height:100vh;
+    display:flex;
+}
+
+.sidebar{
+    width:390px;
+    min-width:320px;
+    background:#111b21;
+    border-right:1px solid #26343a;
+    display:flex;
+    flex-direction:column;
+}
+
+.topbar{
+    height:65px;
+    background:#202c33;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px;
+}
+
+.logo-small{
+    color:#25d366;
+    font-size:22px;
+    font-weight:bold;
+}
+
+.top-actions{
+    display:flex;
+    gap:20px;
+    font-size:21px;
+}
+
+.action{
+    cursor:pointer;
+}
+
+.profile{
+    background:#182229;
+    padding:12px 15px;
+    border-bottom:1px solid #26343a;
+}
+
+.profile-name{
+    font-weight:bold;
+}
+
+.profile-number{
+    color:#8696a0;
+    font-size:12px;
+    margin-top:3px;
+}
+
+.search{
+    padding:10px;
+}
+
+.search-box{
+    height:40px;
+    background:#202c33;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 14px;
+}
+
+.search-box input{
+    flex:1;
+    background:none;
+    border:0;
+    outline:0;
+    color:white;
+}
+
+.chat-list{
+    flex:1;
+    overflow-y:auto;
+}
+
+.chat{
+    height:72px;
+    padding:8px 14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border-bottom:1px solid #202c33;
+    cursor:pointer;
+}
+
+.chat:hover{
+    background:#202c33;
+}
+
+.avatar{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    background:#344047;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:23px;
+}
+
+.chat-info{
+    flex:1;
+    min-width:0;
+}
+
+.chat-name{
+    display:flex;
+    justify-content:space-between;
+}
+
+.chat-time{
+    color:#8696a0;
+    font-size:11px;
+}
+
+.chat-preview{
+    color:#8696a0;
+    font-size:13px;
+    margin-top:5px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+/* CHAT */
+
+.chat-area{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    background:#0b141a;
+}
+
+.empty{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    color:#8696a0;
+}
+
+.empty h1{
+    color:#e9edef;
+    margin-bottom:10px;
+}
+
+.chat-header{
+    height:65px;
+    background:#202c33;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:0 15px;
+}
+
+.back{
+    display:none;
+    font-size:28px;
+    cursor:pointer;
+}
+
+.header-avatar{
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    background:#344047;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.header-info{
+    flex:1;
+}
+
+.header-name{
+    font-size:16px;
+}
+
+.status{
+    color:#8696a0;
+    font-size:12px;
+    margin-top:3px;
+}
+
+.header-actions{
+    display:flex;
+    gap:20px;
+    font-size:20px;
+}
+
+.messages{
+    flex:1;
+    overflow-y:auto;
+    padding:25px 7%;
+}
+
+.date{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.date span{
+    background:#202c33;
+    padding:7px 12px;
+    border-radius:7px;
+    font-size:11px;
+    color:#c9d1d5;
+}
+
+.message{
+    max-width:65%;
+    padding:8px 10px;
+    margin-bottom:7px;
+    border-radius:8px;
+    font-size:14px;
+    line-height:20px;
+    word-wrap:break-word;
+}
+
+.received{
+    background:#202c33;
+    margin-right:auto;
+}
+
+.sent{
+    background:#005c4b;
+    margin-left:auto;
+}
+
+.message-time{
+    float:right;
+    font-size:10px;
+    color:#aeb8bd;
+    margin-left:8px;
+    margin-top:4px;
+}
+
+.check{
+    color:#53bdeb;
+}
+
+.input-area{
+    min-height:64px;
+    background:#202c33;
+    padding:8px 12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.input-icon{
+    font-size:22px;
+    cursor:pointer;
+    color:#aebac1;
+}
+
+.message-input{
+    flex:1;
+    background:#2a3942;
+    border:0;
+    outline:0;
+    color:white;
+    border-radius:8px;
+    padding:12px 15px;
+}
+
+.send{
+    width:44px;
+    height:44px;
+    border:0;
+    border-radius:50%;
+    background:#25d366;
+    cursor:pointer;
+}
+
+/* MODAL */
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:500;
+}
+
+.modal-box{
+    width:92%;
+    max-width:400px;
+    background:#202c33;
+    padding:25px;
+    border-radius:12px;
+}
+
+.modal-box h2{
+    margin-bottom:15px;
+}
+
+.modal-box input{
+    width:100%;
+    padding:13px;
+    background:#2a3942;
+    border:0;
+    outline:0;
+    color:white;
+    border-radius:7px;
+    margin-bottom:12px;
+}
+
+.modal-buttons{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+}
+
+.modal-buttons button{
+    padding:10px 18px;
+    border:0;
+    border-radius:7px;
+    cursor:pointer;
+}
+
+.cancel{
+    background:#344047;
+    color:white;
+}
+
+.confirm{
+    background:#25d366;
+}
+
+@media(max-width:750px){
+
+    .sidebar{
+        width:100%;
+        min-width:100%;
+    }
+
+    .chat-area{
+        display:none;
+    }
+
+    .app.chat-open .sidebar{
+        display:none;
+    }
+
+    .app.chat-open .chat-area{
+        display:flex;
+    }
+
+    .back{
+        display:block;
+    }
+
+    .messages{
+        padding:20px 4%;
+    }
+
+    .message{
+        max-width:82%;
+    }
+}
 </style>
 </head>
-<body>
-<!-- ALL SCREENS -->
-<div id="authScreen" class="screen"><div class="authBox"><h1 style="color:#00BFA6;font-size:32px;margin-bottom:10px">LinkUp</h1><input id="authIdInput" type="text" placeholder="LNK-123456 or leave blank"><button class="authBtn" onclick="joinApp()">Join LinkUp</button></div></div>
-<div id="chatsScreen" class="screen hidden"><div class="header"><h1>LinkUp</h1><div class="headerBtn" onclick="showSettings()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0.3 1.9l.1.1-1.4 1.4-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-2v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L9 17l.1-.1a1.7 1.7 0 0 0.3-1.9 1.7 1.7 0 0 0-1.6-1H7v-2h.8a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L9 9l1.4-1.4.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.2h2v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L20 9l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v2h-.2a1.7 1.7 0 0 0-1.8 1z"></path></svg></div><div class="headerBtn" onclick="toggleMenu()"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></div></div><div id="chatList"></div><button class="fab" onclick="showNewChat()"><svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button></div>
-<div id="settingsScreen" class="screen hidden"><div class="header"><div class="back" onclick="backToChats()"><svg viewBox="0 0 24 24"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg></div><h1>Settings</h1></div><div class="profileBox"><div class="profileAvatar" id="profileAvatar"></div><div><div style="font-size:18px;font-weight:bold" id="profileId"></div><div style="color:#8A9BA8;font-size:14px">Your LinkUp ID</div></div></div><div class="settingItem" onclick="alert('Coming Soon')"><div class="settingIcon" style="background:#4CAF50"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"></rect><path d="M9 18h6"></path></svg></div><div class="settingInfo"><div class="settingTitle">Your Private Number</div><div class="settingDesc">LinkUp ID based</div></div></div><div class="settingItem" onclick="inviteFriends()"><div class="settingIcon" style="background:#9C27B0"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg></div><div class="settingInfo"><div class="settingTitle">Invite Friends</div></div></div><div class="settingItem" onclick="alert('Coming Soon')"><div class="settingIcon" style="background:#2196F3"><svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path><path d="M8 9h8"></path><path d="M8 13h5"></path></svg></div><div class="settingInfo"><div class="settingTitle">Chats</div></div></div><div class="settingItem" onclick="alert('Coming Soon')"><div class="settingIcon" style="background:#4CAF50"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></div><div class="settingInfo"><div class="settingTitle">Privacy</div></div></div><div class="settingItem" onclick="alert('Coming Soon')"><div class="settingIcon" style="background:#F44336"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><div class="settingInfo"><div class="settingTitle">Notifications</div></div></div><div class="settingItem" onclick="alert('Coming Soon')"><div class="settingIcon" style="background:#4CAF50"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path><path d="M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"></path></svg></div><div class="settingInfo"><div class="settingTitle">Data Storage</div></div></div><div class="settingItem" onclick="changeTextSize()"><div class="settingIcon" style="background:#673AB7"><svg viewBox="0 0 24 24"><path d="M4 7V4h16v3"></path><path d="M12 4v16"></path><path d="M8 20h8"></path></svg></div><div class="settingInfo"><div class="settingTitle">Text Size</div></div></div><div class="settingItem" onclick="alert('LinkUp v2.7.3')"><div class="settingIcon" style="background:#607D8B"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg></div><div class="settingInfo"><div class="settingTitle">About</div></div><div style="color:#8A9BA8">v2.7.3</div></div><div class="settingItem" onclick="switchAccount()"><div class="settingIcon" style="background:#FF9800"><svg viewBox="0 0 24 24"><path d="M16 3h5v5"></path><path d="M21 3l-7 7"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg></div><div class="settingInfo"><div class="settingTitle">Switch account</div></div></div></div>
-<div id="chatScreen" class="screen hidden"><div class="header"><div class="back" onclick="backToChats()"><svg viewBox="0 0 24 24"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg></div><h1 id="chatWithId"></h1><div class="headerBtn" onclick="showChatMenu()"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></div></div><div id="blockedBanner" class="blockedBanner hidden">You blocked this user <button onclick="unblockUser()" style="background:#00BFA6;border:none;padding:4px 10px;border-radius:4px;color:#000;margin-left:10px">Unblock</button></div><div id="messages"></div><div id="inputArea" class="inputArea"><input id="msgInput" type="text" placeholder="Type message..." onkeypress="if(event.key==='Enter') sendMsg()"><button onclick="sendMsg()"><svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg></button></div></div>
-<div id="mainMenu" class="menu hidden" onclick="event.stopPropagation()"><div class="menuItem" onclick="showNewBroadcast()"><svg viewBox="0 0 24 24"><path d="M3 11v2"></path><path d="M6 8v8"></path><path d="M10 5v14"></path><path d="M14 3v18"></path><path d="M18 7v10"></path><path d="M21 10v4"></path></svg>New broadcast</div><div class="menuItem" onclick="showStarred()"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"></path></svg>Starred</div><div class="menuItem" onclick="showBlocked()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m5.6 5.6 12.8 12.8"></path></svg>Blocked</div><div class="menuItem" onclick="switchAccount()"><svg viewBox="0 0 24 24"><path d="M16 3h5v5"></path><path d="M21 3l-7 7"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Switch account</div></div>
-<div id="newChatPopup" class="popup hidden"><div class="popupBox"><h2>New Chat</h2><input id="friendIdInput" type="text" placeholder="LNK-123456"><button class="popupBtn" onclick="startChat()"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9.8 9.8 0 0 1-4.2-1L3 21l1.5-4.3A8.4 8.4 0 0 1 3 12a8.5 8.5 0 1 1 18 0Z"></path><path d="M8 12h8"></path></svg>Start Chat</button><button class="popupBtn" style="background:#1E2A36;color:#fff" onclick="hideNewChat()"><svg viewBox="0 0 24 24"><path d="m6 6 12 12"></path><path d="M18 6 6 18"></path></svg>Cancel</button></div></div>
-<div id="broadcastPopup" class="popup hidden"><div class="popupBox"><h2>New Broadcast</h2><div id="broadcastList"></div><input id="broadcastMsg" type="text" placeholder="Type broadcast message" style="width:100%;padding:12px;background:#0A0E13;border:1px solid #263442;border-radius:8px;color:#fff;margin:15px 0"><button class="popupBtn" onclick="sendBroadcast()"><svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>Send Broadcast</button><button class="popupBtn" style="background:#1E2A36;color:#fff" onclick="hideBroadcast()"><svg viewBox="0 0 24 24"><path d="m6 6 12 12"></path><path d="M18 6 6 18"></path></svg>Cancel</button></div></div>
-<div id="starredPopup" class="popup hidden" onclick="hideStarred()"><div class="popupBox" onclick="event.stopPropagation()"><h3 style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#FFD700;fill:none;stroke-width:2"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"></path></svg>Starred Chats</h3><div id="starredList"></div><button class="popupBtn" style="background:#1E2A36;color:#fff" onclick="hideStarred()"><svg viewBox="0 0 24 24"><path d="m6 6 12 12"></path><path d="M18 6 6 18"></path></svg>Close</button></div></div>
-<div id="chatMenu" class="popup hidden" onclick="hideChatMenu()"><div class="popupBox" onclick="event.stopPropagation()"><h3>Chat Options</h3><button class="popupBtn" onclick="toggleStar()"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"></path></svg>Star Chat</button><button class="popupBtn danger" onclick="blockUser()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m5.6 5.6 12.8 12.8"></path></svg>Block User</button><button class="popupBtn danger" onclick="deleteChat()"><svg viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="m19 6-1 15H6L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>Delete Chat</button><button class="popupBtn" style="background:#1E2A36;color:#fff" onclick="hideChatMenu()"><svg viewBox="0 0 24 24"><path d="m6 6 12 12"></path><path d="M18 6 6 18"></path></svg>Cancel</button></div></div>
-<div id="blockedPopup" class="popup hidden" onclick="hideBlocked()"><div class="popupBox" onclick="event.stopPropagation()"><h3 style="display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" style="width:20px;height:20px"><circle cx="12" cy="12" r="9"></circle><path d="m5.6 5.6 12.8 12.8"></path></svg>Blocked Users</h3><div id="blockedList"></div><button class="popupBtn" style="background:#1E2A36;color:#fff" onclick="hideBlocked()"><svg viewBox="0 0 24 24"><path d="m6 6 12 12"></path><path d="M18 6 6 18"></path></svg>Close</button></div></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-const firebaseConfig = { databaseURL: "https://linkup-chat-3fdd5-default-rtdb.firebaseio.com", projectId: "linkup-chat-3fdd5" };
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-let myId = "", currentChat = "", currentFriend = "";
-if(localStorage.getItem('linkupId')){ myId = localStorage.getItem('linkupId'); showApp(); }
-window.joinApp = () => { const inputId = document.getElementById('authIdInput').value.toUpperCase(); myId = inputId && inputId.startsWith("LNK-")? inputId : "LNK-" + Math.floor(100000 + Math.random() * 900000); localStorage.setItem('linkupId', myId); showApp(); }
-function showApp(){ document.getElementById('authScreen').classList.add('hidden'); document.getElementById('chatsScreen').classList.remove('hidden'); document.getElementById('profileId').innerText = myId; document.getElementById('profileAvatar').innerText = myId[4]; loadChats(); }
-window.showSettings = () => { document.getElementById('chatsScreen').classList.add('hidden'); document.getElementById('settingsScreen').classList.remove('hidden'); }
-window.backToChats = () => { document.getElementById('chatScreen').classList.add('hidden'); document.getElementById('settingsScreen').classList.add('hidden'); document.getElementById('chatsScreen').classList.remove('hidden'); loadChats(); }
-window.inviteFriends = () => { navigator.clipboard.writeText("Join me on LinkUp! My ID: " + myId); alert("Invite copied! Share your ID: " + myId); }
-window.changeTextSize = () => { const size = prompt("Enter text size: 12-20", "16"); if(size) document.body.style.fontSize = size + "px"; }
-window.toggleMenu = () => document.getElementById('mainMenu').classList.toggle('hidden');
-window.showNewChat = () => document.getElementById('newChatPopup').classList.remove('hidden');
-window.hideNewChat = () => document.getElementById('newChatPopup').classList.add('hidden');
-window.showChatMenu = () => document.getElementById('chatMenu').classList.remove('hidden');
-window.hideChatMenu = () => document.getElementById('chatMenu').classList.add('hidden');
-window.showNewBroadcast = () => { toggleMenu(); document.getElementById('broadcastPopup').classList.remove('hidden'); loadBroadcastList(); }
-window.hideBroadcast = () => document.getElementById('broadcastPopup').classList.add('hidden');
-function loadBroadcastList(){ const list = document.getElementById('broadcastList'); list.innerHTML = "Loading..."; onValue(ref(db, 'chatList/' + myId), snap => { const chats = snap.val(); list.innerHTML = ""; if(chats) Object.keys(chats).forEach(fid => { list.innerHTML += `<label style="display:block;padding:8px"><input type="checkbox" class="checkbox" value="${fid}"> ${fid}</label>`; }); }, {onlyOnce: true}); }
-window.sendBroadcast = () => { const msg = document.getElementById('broadcastMsg').value; if(!msg) return alert("Type message"); const checked = [...document.querySelectorAll('#broadcastList input:checked')].map(i => i.value); checked.forEach(fid => { const chatId = [myId, fid].sort().join('_'); push(ref(db, 'chats/' + chatId), { sender: myId, text: "[Broadcast] " + msg, time: Date.now() }); update(ref(db, 'chatList/' + myId + '/' + fid), { lastTime: Date.now(), lastMsg: "[Broadcast] " + msg }); update(ref(db, 'chatList/' + fid + '/' + myId), { lastTime: Date.now(), lastMsg: "[Broadcast] " + msg }); alert("Broadcast sent to " + checked.length + " people"); hideBroadcast(); }
-window.showStarred = () => { toggleMenu(); document.getElementById('starredPopup').classList.remove('hidden'); loadStarred(); }
-window.hideStarred = () => document.getElementById('starredPopup').classList.add('hidden');
-function loadStarred(){ const list = document.getElementById('starredList'); onValue(ref(db, 'starred/' + myId), snap => { const starred = snap.val(); list.innerHTML =!starred? `<div style="color:#8A9BA8;text-align:center;padding:20px">No starred chats</div>` : ""; if(starred) Object.keys(starred).forEach(fid => { list.innerHTML += `<div class="chatItem" onclick="document.getElementById('friendIdInput').value='${fid}'; startChat(); hideStarred()"><div class="avatar">${fid[4]}</div><div class="chatName">${fid}</div></div>`; }); }, {onlyOnce: true}); }
-window.toggleStar = () => { const starredRef = ref(db, 'starred/' + myId + '/' + currentFriend); onValue(starredRef, snap => { snap.val()? remove(starredRef) : set(starredRef, true); hideChatMenu(); loadChats(); }, {onlyOnce: true}); }
-window.switchAccount = () => { if(confirm("Logout and switch account?")){ localStorage.removeItem('linkupId'); location.reload(); } }
-window.startChat = () => { const fid = document.getElementById('friendIdInput').value.toUpperCase(); if(!fid || fid === myId) return alert("Enter valid ID"); currentFriend = fid; currentChat = [myId, fid].sort().join('_'); document.getElementById('chatWithId').innerText = fid; document.getElementById('chatsScreen').classList.add('hidden'); document.getElementById('chatScreen').classList.remove('hidden'); hideNewChat(); checkBlocked(); loadMessages(); update(ref(db, 'chatList/' + myId + '/' + fid), { lastTime: Date.now(), lastMsg: "Chat started" }); update(ref(db, 'chatList/' + fid + '/' + myId), { lastTime: Date.now(), lastMsg: "Chat started" }); }
-window.sendMsg = () => { const text = document.getElementById('msgInput').value; if(!text) return; push(ref(db, 'chats/' + currentChat), { sender: myId, text, time: Date.now() }); update(ref(db, 'chatList/' + myId + '/' + currentFriend), { lastTime: Date.now(), lastMsg: text }); update(ref(db, 'chatList/' + currentFriend + '/' + myId), { lastTime: Date.now(), lastMsg: text }); document.getElementById('msgInput').value = ""; }
-function checkBlocked(){ onValue(ref(db, 'blocked/' + myId + '/' + currentFriend), snap => { const blocked = snap.val(); document.getElementById('blockedBanner').classList.toggle('hidden',!blocked); document.getElementById('inputArea').classList.toggle('disabled', blocked); }); }
-window.blockUser = () => { if(confirm("Block " + currentFriend + "?")){ set(ref(db, 'blocked/' + myId + '/' + currentFriend), true); remove(ref(db, 'chatList/' + myId + '/' + currentFriend)); hideChatMenu(); backToChats(); } }
-window.unblockUser = () => remove(ref(db, 'blocked/' + myId + '/' + currentFriend));
-window.deleteChat = () => { if(confirm("Delete this chat for you?")){ remove(ref(db, 'chatList/' + myId + '/' + currentFriend)); hideChatMenu(); backToChats(); } }
-window.showBlocked = () => { toggleMenu(); document.getElementById('blockedPopup').classList.remove('hidden'); loadBlockedList(); }
-window.hideBlocked = () => document.getElementById('blockedPopup').classList.add('hidden');
-function loadBlockedList(){ const list = document.getElementById('blockedList'); onValue(ref(db, 'blocked/' + myId), snap => { const blocked = snap.val(); list.innerHTML =!blocked? `<div style="color:#8A9BA8;text-align:center;padding:20px">No blocked users</div>` : ""; if(blocked) Object.keys(blocked).forEach(fid => { list.innerHTML += `<div style="display:flex;justify-content:space-between;padding:12px"><span>${fid}</span><button onclick="remove(ref(db, 'blocked/' + myId + '/' + fid)); loadBlockedList()" style="background:#d32f2f;border:none;padding:6px 10px;border-radius:6px;color:#fff">Unblock</button></div>`; }); }, {onlyOnce: true}); }
-function loadMessages() { onValue(ref(db, 'chats/' + currentChat), snap => { const msgs = snap.val(); const box = document.getElementById('messages'); box.innerHTML = ""; if(msgs) Object.values(msgs).forEach(m => { const div = document.createElement('div'); div.className = 'msg ' + (m.sender === myId? 'me' : ''); div.innerHTML = `${m.text}<div class="msgBottom">${new Date(m.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`; box.appendChild(div); }); box.scrollTop = box.scrollHeight; }); }
-function loadChats() { onValue(ref(db, 'chatList/' + myId), snap => { const chats = snap.val(); const list = document.getElementById('chatList'); list.innerHTML =!chats? `<div class="empty">💬<br>No chats yet<br>Tap + to start</div>` : ""; if(chats) onValue(ref(db, 'starred/' + myId), starSnap => { const starred = starSnap.val() || {}; Object.keys(chats).forEach(fid => { const div = document.createElement('div'); div.className = 'chatItem ' + (starred[fid]? 'starred' : ''); div.onclick = () => { document.getElementById('friendIdInput').value = fid; startChat(); } div.innerHTML = `<div class="avatar">${fid[4]}</div><div class="chatInfo"><div class="chatName">${starred[fid]? '⭐ ' : ''}${fid}</div><div class="lastMsg">${chats[fid].lastMsg || 'No messages'}</div></div>`; list.appendChild(div); }); }
-document.addEventListener('click', () => document.getElementById('mainMenu').classList.add('hidden'));
-</script>
-</body>
-</html>
+<body>
+
+<!-- ==================================================
+     PHONE REGISTRATION
+================================================== -->
+
+<div class="auth-screen" id="authScreen">
+
+    <div class="auth-box">
+
+        <div class="logo">
+            LinkUp
+        </div>
+
+        <div class="subtitle">
+            Connect with people everywhere
+        </div>
+
+        <!-- PHONE STEP -->
+
+        <div id="phoneStep">
+
+            <div class="auth-title">
+                Verify your phone number
+            </div>
+
+            <div class="error" id="phoneError"></div>
+
+            <div class="country-row">
+
+                <input
+                    class="input country"
+                    id="countryCode"
+                    value="+234"
+                    placeholder="+234"
+                >
+
+                <input
+                    class="input phone"
+                    id="phoneNumber"
+                    type="tel"
+                    placeholder="8012345678"
+                >
+
+            </div>
+
+            <button
+                class="button"
+                onclick="sendVerificationCode()"
+            >
+                Send verification code
+            </button>
+
+            <div
+                class="small-text"
+            >
+                You will receive an SMS with a verification code.
+            </div>
+
+        </div>
+
+
+        <!-- CODE STEP -->
+
+        <div
+            id="codeStep"
+            class="hidden"
+        >
+
+            <div class="auth-title">
+                Enter verification code
+            </div>
+
+            <div class="error" id="codeError"></div>
+
+            <input
+                class="input"
+                id="verificationCode"
+                type="text"
+                inputmode="numeric"
+                maxlength="6"
+                placeholder="6-digit code"
+            >
+
+            <button
+                class="button"
+                onclick="verifyCode()"
+            >
+                Verify number
+            </button>
+
+            <div
+                class="small-text"
+                onclick="backToPhone()"
+                style="cursor:pointer;color:#25d366"
+            >
+                Change phone number
+            </div>
+
+        </div>
+
+
+        <!-- PROFILE STEP -->
+
+        <div
+            id="profileStep"
+            class="hidden"
+        >
+
+            <div class="auth-title">
+                Create your profile
+            </div>
+
+            <div class="error" id="profileError"></div>
+
+            <input
+                class="input"
+                id="displayName"
+                type="text"
+                placeholder="Your name"
+                maxlength="40"
+            >
+
+            <button
+                class="button"
+                onclick="finishProfile()"
+            >
+                Continue
+            </button>
+
+        </div>
+
+        <!-- CAPTCHA -->
+
+        <div id="recaptcha-container"></div>
+
+    </div>
+
+</div>
+
+
+<!-- ==================================================
+     MAIN APP
+================================================== -->
+
+<div
+    class="app hidden"
+    id="app"
+>
+
+    <div class="sidebar">
+
+        <div class="topbar">
+
+            <div class="logo-small">
+                LinkUp
+            </div>
+
+            <div class="top-actions">
+
+                <span
+                    class="action"
+                    onclick="newChat()"
+                >
+                    ✚
+                </span>
+
+                <span
+                    class="action"
+                    onclick="logout()"
+                >
+                    ⎋
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="profile">
+
+            <div
+                class="profile-name"
+                id="myName"
+            >
+                User
+            </div>
+
+            <div
+                class="profile-number"
+                id="myNumber"
+            >
+                +234
+            </div>
+
+        </div>
+
+
+        <div class="search">
+
+            <div class="search-box">
+
+                🔍
+
+                <input
+                    id="searchInput"
+                    placeholder="Search chats"
+                    oninput="searchChats()"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="chat-list"
+            id="chatList"
+        ></div>
+
+    </div>
+
+
+    <div
+        class="chat-area"
+        id="chatArea"
+    >
+
+        <div class="empty">
+
+            <div>
+
+                <h1>LinkUp</h1>
+
+                <p>
+                    Select a chat or start a new conversation.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ==================================================
+     NEW CHAT
+================================================== -->
+
+<div
+    class="modal"
+    id="newChatModal"
+>
+
+    <div class="modal-box">
+
+        <h2>
+            Start new chat
+        </h2>
+
+        <input
+            id="recipientPhone"
+            type="tel"
+            placeholder="+2348012345678"
+        >
+
+        <div
+            style="
+            color:#8696a0;
+            font-size:12px;
+            line-height:18px;
+            margin-bottom:15px;
+            "
+        >
+            Enter the person's verified LinkUp phone number.
+            They don't need to add you first.
+        </div>
+
+        <div class="modal-buttons">
+
+            <button
+                class="cancel"
+                onclick="closeNewChat()"
+            >
+                Cancel
+            </button>
+
+            <button
+                class="confirm"
+                onclick="findUserByPhone()"
+            >
+                Start chat
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ==================================================
+   FIREBASE CONFIG
+
+   REPLACE WITH YOUR OWN FIREBASE PROJECT VALUES
+================================================== */
+
+const firebaseConfig = {
+
+    apiKey: "YOUR_API_KEY",
+
+    authDomain:
+        "YOUR_PROJECT.firebaseapp.com",
+
+    databaseURL:
+        "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+
+    projectId:
+        "YOUR_PROJECT_ID",
+
+    storageBucket:
+        "YOUR_PROJECT.firebasestorage.app",
+
+    messagingSenderId:
+        "YOUR_MESSAGING_SENDER_ID",
+
+    appId:
+        "YOUR_APP_ID"
+};
+
+
+/* ==================================================
+   INITIALIZE
+================================================== */
+
+firebase.initializeApp(firebaseConfig);
+
+const auth =
+    firebase.auth();
+
+const db =
+    firebase.database();
+
+
+/* ==================================================
+   VARIABLES
+================================================== */
+
+let currentUser = null;
+
+let currentProfile = null;
+
+let currentChatUser = null;
+
+let currentChatId = null;
+
+let confirmationResult = null;
+
+let recaptchaVerifier = null;
+
+let messagesListener = null;
+
+
+/* ==================================================
+   PHONE HELPERS
+================================================== */
+
+function normalizePhone(){
+
+    let country =
+        document
+        .getElementById("countryCode")
+        .value
+        .trim();
+
+    let phone =
+        document
+        .getElementById("phoneNumber")
+        .value
+        .trim();
+
+    country =
+        country.replace(/[^\d+]/g,"");
+
+    phone =
+        phone.replace(/\D/g,"");
+
+    if(country === ""){
+        country = "+234";
+    }
+
+    if(!country.startsWith("+")){
+        country = "+" + country;
+    }
+
+    return country + phone;
+}
+
+
+function cleanPhone(phone){
+
+    return phone.replace(
+        /[^0-9]/g,
+        ""
+    );
+}
+
+
+/* ==================================================
+   RECAPTCHA
+================================================== */
+
+function setupRecaptcha(){
+
+    if(recaptchaVerifier){
+        return;
+    }
+
+    recaptchaVerifier =
+        new firebase.auth.RecaptchaVerifier(
+            "recaptcha-container",
+            {
+                size:"invisible",
+
+                callback:function(){
+                    console.log(
+                        "reCAPTCHA verified"
+                    );
+                }
+            }
+        );
+
+    recaptchaVerifier.render();
+}
+
+
+/* ==================================================
+   SEND SMS
+================================================== */
+
+async function sendVerificationCode(){
+
+    clearErrors();
+
+    const phone =
+        normalizePhone();
+
+    if(phone.length < 10){
+
+        document
+        .getElementById("phoneError")
+        .innerText =
+            "Enter a valid phone number.";
+
+        return;
+    }
+
+    try{
+
+        setupRecaptcha();
+
+        confirmationResult =
+            await auth.signInWithPhoneNumber(
+                phone,
+                recaptchaVerifier
+            );
+
+        document
+        .getElementById("phoneStep")
+        .classList.add("hidden");
+
+        document
+        .getElementById("codeStep")
+        .classList.remove("hidden");
+
+    }catch(error){
+
+        console.error(error);
+
+        document
+        .getElementById("phoneError")
+        .innerText =
+            firebaseError(error.code);
+    }
+}
+
+
+/* ==================================================
+   VERIFY CODE
+================================================== */
+
+async function verifyCode(){
+
+    clearErrors();
+
+    const code =
+        document
+        .getElementById("verificationCode")
+        .value
+        .trim();
+
+    if(code.length !== 6){
+
+        document
+        .getElementById("codeError")
+        .innerText =
+            "Enter the 6-digit code.";
+
+        return;
+    }
+
+    try{
+
+        const result =
+            await confirmationResult
+            .confirm(code);
+
+        currentUser =
+            result.user;
+
+        const existing =
+            await db
+            .ref(
+                "users/" +
+                currentUser.uid
+            )
+            .once("value");
+
+        if(existing.exists()){
+
+            currentProfile =
+                existing.val();
+
+            startApplication();
+
+        }else{
+
+            document
+            .getElementById("codeStep")
+            .classList.add("hidden");
+
+            document
+            .getElementById("profileStep")
+            .classList.remove("hidden");
+        }
+
+    }catch(error){
+
+        console.error(error);
+
+        document
+        .getElementById("codeError")
+        .innerText =
+            "Invalid or expired verification code.";
+    }
+}
+
+
+/* ==================================================
+   CREATE PROFILE
+================================================== */
+
+async function finishProfile(){
+
+    clearErrors();
+
+    const name =
+        document
+        .getElementById("displayName")
+        .value
+        .trim();
+
+    if(name.length < 2){
+
+        document
+        .getElementById("profileError")
+        .innerText =
+            "Enter your name.";
+
+        return;
+    }
+
+    try{
+
+        /*
+         * Store the user's phone number.
+         * The UID is Firebase's secure account identifier.
+         */
+
+        const profile = {
+
+            uid:
+                currentUser.uid,
+
+            name:
+                name,
+
+            phone:
+                currentUser.phoneNumber,
+
+            phoneSearch:
+                cleanPhone(
+                    currentUser.phoneNumber
+                ),
+
+            createdAt:
+                firebase.database.ServerValue.TIMESTAMP,
+
+            online:true
+        };
+
+
+        await db
+            .ref(
+                "users/" +
+                currentUser.uid
+            )
+            .set(profile);
+
+
+        /*
+         * Phone lookup index.
+         * This allows another LinkUp user to find
+         * this account using the phone number.
+         */
+
+        await db
+            .ref(
+                "phoneIndex/" +
+                cleanPhone(
+                    currentUser.phoneNumber
+                )
+            )
+            .set(
+                currentUser.uid
+            );
+
+
+        currentProfile =
+            profile;
+
+        startApplication();
+
+    }catch(error){
+
+        console.error(error);
+
+        document
+        .getElementById("profileError")
+        .innerText =
+            "Could not create your profile.";
+    }
+}
+
+
+/* ==================================================
+   AUTH STATE
+================================================== */
+
+auth.onAuthStateChanged(async user=>{
+
+    if(!user){
+        return;
+    }
+
+    currentUser = user;
+
+    const snapshot =
+        await db
+        .ref(
+            "users/" +
+            user.uid
+        )
+        .once("value");
+
+    if(snapshot.exists()){
+
+        currentProfile =
+            snapshot.val();
+
+        startApplication();
+
+    }else{
+
+        /*
+         * Don't automatically show the app
+         * until the profile is completed.
+         */
+    }
+});
+
+
+/* ==================================================
+   START APP
+================================================== */
+
+function startApplication(){
+
+    document
+    .getElement
