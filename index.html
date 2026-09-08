@@ -10,1197 +10,480 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,Helvetica,sans-serif;
-}
-
-body{
-    background:#111b21;
-    color:white;
-    height:100vh;
-    overflow:hidden;
-}
-
-button,input{
-    font:inherit;
-}
-
-.hidden{
-    display:none!important;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{background:#111b21;color:white;height:100vh;overflow:hidden}
+button,input{font:inherit}
+.hidden{display:none!important}
 
 /* AUTH */
-
-.auth-screen{
-    position:fixed;
-    inset:0;
-    background:#111b21;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:1000;
-}
-
-.auth-box{
-    width:92%;
-    max-width:420px;
-    background:#202c33;
-    padding:30px;
-    border-radius:15px;
-}
-
-.logo{
-    text-align:center;
-    color:#25d366;
-    font-size:34px;
-    font-weight:bold;
-    margin-bottom:8px;
-}
-
-.subtitle{
-    text-align:center;
-    color:#8696a0;
-    margin-bottom:25px;
-    font-size:14px;
-}
-
-.auth-title{
-    text-align:center;
-    margin-bottom:18px;
-}
-
-.input{
-    width:100%;
-    padding:14px;
-    border:0;
-    outline:0;
-    border-radius:8px;
-    background:#2a3942;
-    color:white;
-    margin-bottom:12px;
-}
-
-.country-row{
-    display:flex;
-    gap:8px;
-}
-
-.country{
-    width:100px;
-}
-
-.phone{
-    flex:1;
-}
-
-.button{
-    width:100%;
-    padding:14px;
-    border:0;
-    border-radius:8px;
-    background:#25d366;
-    color:#071b12;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-.small-text{
-    text-align:center;
-    color:#8696a0;
-    font-size:12px;
-    line-height:18px;
-    margin-top:15px;
-}
-
-.error{
-    color:#ff6b6b;
-    font-size:13px;
-    margin-bottom:12px;
-    text-align:center;
-}
+.auth-screen{position:fixed;inset:0;background:#111b21;display:flex;align-items:center;justify-content:center;z-index:1000}
+.auth-box{width:92%;max-width:420px;background:#202c33;padding:30px;border-radius:15px}
+.logo{text-align:center;color:#25d366;font-size:34px;font-weight:bold;margin-bottom:8px}
+.subtitle{text-align:center;color:#8696a0;margin-bottom:25px;font-size:14px}
+.auth-title{text-align:center;margin-bottom:18px}
+.input{width:100%;padding:14px;border:0;outline:0;border-radius:8px;background:#2a3942;color:white;margin-bottom:12px}
+.country-row{display:flex;gap:8px}
+.country{width:100px}
+.phone{flex:1}
+.button{width:100%;padding:14px;border:0;border-radius:8px;background:#25d366;color:#071b12;font-weight:bold;cursor:pointer}
+.small-text{text-align:center;color:#8696a0;font-size:12px;line-height:18px;margin-top:15px}
+.error{color:#ff6b6b;font-size:13px;margin-bottom:12px;text-align:center}
 
 /* APP */
-
-.app{
-    width:100%;
-    height:100vh;
-    display:flex;
-}
-
-.sidebar{
-    width:390px;
-    min-width:320px;
-    background:#111b21;
-    border-right:1px solid #26343a;
-    display:flex;
-    flex-direction:column;
-}
-
-.topbar{
-    height:65px;
-    background:#202c33;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 16px;
-}
-
-.logo-small{
-    color:#25d366;
-    font-size:22px;
-    font-weight:bold;
-}
-
-.top-actions{
-    display:flex;
-    gap:20px;
-    font-size:21px;
-}
-
-.action{
-    cursor:pointer;
-}
-
-.profile{
-    background:#182229;
-    padding:12px 15px;
-    border-bottom:1px solid #26343a;
-}
-
-.profile-name{
-    font-weight:bold;
-}
-
-.profile-number{
-    color:#8696a0;
-    font-size:12px;
-    margin-top:3px;
-}
-
-.search{
-    padding:10px;
-}
-
-.search-box{
-    height:40px;
-    background:#202c33;
-    border-radius:8px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:0 14px;
-}
-
-.search-box input{
-    flex:1;
-    background:none;
-    border:0;
-    outline:0;
-    color:white;
-}
-
-.chat-list{
-    flex:1;
-    overflow-y:auto;
-}
-
-.chat{
-    height:72px;
-    padding:8px 14px;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    border-bottom:1px solid #202c33;
-    cursor:pointer;
-}
-
-.chat:hover{
-    background:#202c33;
-}
-
-.avatar{
-    width:52px;
-    height:52px;
-    border-radius:50%;
-    background:#344047;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:23px;
-}
-
-.chat-info{
-    flex:1;
-    min-width:0;
-}
-
-.chat-name{
-    display:flex;
-    justify-content:space-between;
-}
-
-.chat-time{
-    color:#8696a0;
-    font-size:11px;
-}
-
-.chat-preview{
-    color:#8696a0;
-    font-size:13px;
-    margin-top:5px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
+.app{width:100%;height:100vh;display:flex}
+.sidebar{width:390px;min-width:320px;background:#111b21;border-right:1px solid #26343a;display:flex;flex-direction:column}
+.topbar{height:65px;background:#202c33;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.logo-small{color:#25d366;font-size:22px;font-weight:bold}
+.top-actions{display:flex;gap:20px;font-size:21px}
+.action{cursor:pointer}
+.profile{background:#182229;padding:12px 15px;border-bottom:1px solid #26343a}
+.profile-name{font-weight:bold}
+.profile-number{color:#8696a0;font-size:12px;margin-top:3px}
+.search{padding:10px}
+.search-box{height:40px;background:#202c33;border-radius:8px;display:flex;align-items:center;gap:10px;padding:0 14px}
+.search-box input{flex:1;background:none;border:0;outline:0;color:white}
+.chat-list{flex:1;overflow-y:auto}
+.chat{height:72px;padding:8px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #202c33;cursor:pointer}
+.chat:hover{background:#202c33}
+.avatar{width:52px;height:52px;border-radius:50%;background:#344047;display:flex;align-items:center;justify-content:center;font-size:23px}
+.chat-info{flex:1;min-width:0}
+.chat-name{display:flex;justify-content:space-between}
+.chat-time{color:#8696a0;font-size:11px}
+.chat-preview{color:#8696a0;font-size:13px;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* CHAT */
-
-.chat-area{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    background:#0b141a;
-}
-
-.empty{
-    flex:1;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    color:#8696a0;
-}
-
-.empty h1{
-    color:#e9edef;
-    margin-bottom:10px;
-}
-
-.chat-header{
-    height:65px;
-    background:#202c33;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:0 15px;
-}
-
-.back{
-    display:none;
-    font-size:28px;
-    cursor:pointer;
-}
-
-.header-avatar{
-    width:44px;
-    height:44px;
-    border-radius:50%;
-    background:#344047;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-.header-info{
-    flex:1;
-}
-
-.header-name{
-    font-size:16px;
-}
-
-.status{
-    color:#8696a0;
-    font-size:12px;
-    margin-top:3px;
-}
-
-.header-actions{
-    display:flex;
-    gap:20px;
-    font-size:20px;
-}
-
-.messages{
-    flex:1;
-    overflow-y:auto;
-    padding:25px 7%;
-}
-
-.date{
-    text-align:center;
-    margin-bottom:20px;
-}
-
-.date span{
-    background:#202c33;
-    padding:7px 12px;
-    border-radius:7px;
-    font-size:11px;
-    color:#c9d1d5;
-}
-
-.message{
-    max-width:65%;
-    padding:8px 10px;
-    margin-bottom:7px;
-    border-radius:8px;
-    font-size:14px;
-    line-height:20px;
-    word-wrap:break-word;
-}
-
-.received{
-    background:#202c33;
-    margin-right:auto;
-}
-
-.sent{
-    background:#005c4b;
-    margin-left:auto;
-}
-
-.message-time{
-    float:right;
-    font-size:10px;
-    color:#aeb8bd;
-    margin-left:8px;
-    margin-top:4px;
-}
-
-.check{
-    color:#53bdeb;
-}
-
-.input-area{
-    min-height:64px;
-    background:#202c33;
-    padding:8px 12px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-.input-icon{
-    font-size:22px;
-    cursor:pointer;
-    color:#aebac1;
-}
-
-.message-input{
-    flex:1;
-    background:#2a3942;
-    border:0;
-    outline:0;
-    color:white;
-    border-radius:8px;
-    padding:12px 15px;
-}
-
-.send{
-    width:44px;
-    height:44px;
-    border:0;
-    border-radius:50%;
-    background:#25d366;
-    cursor:pointer;
-}
+.chat-area{flex:1;display:flex;flex-direction:column;background:#0b141a}
+.empty{flex:1;display:flex;justify-content:center;align-items:center;text-align:center;color:#8696a0}
+.empty h1{color:#e9edef;margin-bottom:10px}
+.chat-header{height:65px;background:#202c33;display:flex;align-items:center;gap:12px;padding:0 15px}
+.back{display:none;font-size:28px;cursor:pointer}
+.header-avatar{width:44px;height:44px;border-radius:50%;background:#344047;display:flex;justify-content:center;align-items:center}
+.header-info{flex:1}
+.header-name{font-size:16px}
+.status{color:#8696a0;font-size:12px;margin-top:3px}
+.header-actions{display:flex;gap:20px;font-size:20px}
+.messages{flex:1;overflow-y:auto;padding:25px 7%}
+.date{text-align:center;margin-bottom:20px}
+.date span{background:#202c33;padding:7px 12px;border-radius:7px;font-size:11px;color:#c9d1d5}
+.message{max-width:65%;padding:8px 10px;margin-bottom:7px;border-radius:8px;font-size:14px;line-height:20px;word-wrap:break-word}
+.received{background:#202c33;margin-right:auto}
+.sent{background:#005c4b;margin-left:auto}
+.message-time{float:right;font-size:10px;color:#aeb8bd;margin-left:8px;margin-top:4px}
+.check{color:#53bdeb}
+.input-area{min-height:64px;background:#202c33;padding:8px 12px;display:flex;align-items:center;gap:10px}
+.input-icon{font-size:22px;cursor:pointer;color:#aebac1}
+.message-input{flex:1;background:#2a3942;border:0;outline:0;color:white;border-radius:8px;padding:12px 15px}
+.send{width:44px;height:44px;border:0;border-radius:50%;background:#25d366;cursor:pointer;font-size:18px}
 
 /* MODAL */
-
-.modal{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.7);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:500;
-}
-
-.modal-box{
-    width:92%;
-    max-width:400px;
-    background:#202c33;
-    padding:25px;
-    border-radius:12px;
-}
-
-.modal-box h2{
-    margin-bottom:15px;
-}
-
-.modal-box input{
-    width:100%;
-    padding:13px;
-    background:#2a3942;
-    border:0;
-    outline:0;
-    color:white;
-    border-radius:7px;
-    margin-bottom:12px;
-}
-
-.modal-buttons{
-    display:flex;
-    justify-content:flex-end;
-    gap:10px;
-}
-
-.modal-buttons button{
-    padding:10px 18px;
-    border:0;
-    border-radius:7px;
-    cursor:pointer;
-}
-
-.cancel{
-    background:#344047;
-    color:white;
-}
-
-.confirm{
-    background:#25d366;
-}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500}
+.modal-box{width:92%;max-width:400px;background:#202c33;padding:25px;border-radius:12px}
+.modal-box h2{margin-bottom:15px}
+.modal-box input{width:100%;padding:13px;background:#2a3942;border:0;outline:0;color:white;border-radius:7px;margin-bottom:12px}
+.modal-buttons{display:flex;justify-content:flex-end;gap:10px}
+.modal-buttons button{padding:10px 18px;border:0;border-radius:7px;cursor:pointer}
+.cancel{background:#344047;color:white}
+.confirm{background:#25d366}
 
 @media(max-width:750px){
-
-    .sidebar{
-        width:100%;
-        min-width:100%;
-    }
-
-    .chat-area{
-        display:none;
-    }
-
-    .app.chat-open .sidebar{
-        display:none;
-    }
-
-    .app.chat-open .chat-area{
-        display:flex;
-    }
-
-    .back{
-        display:block;
-    }
-
-    .messages{
-        padding:20px 4%;
-    }
-
-    .message{
-        max-width:82%;
-    }
+.sidebar{width:100%;min-width:100%}
+.chat-area{display:none}
+.app.chat-open .sidebar{display:none}
+.app.chat-open .chat-area{display:flex}
+.back{display:block}
+.messages{padding:20px 4%}
+.message{max-width:82%}
 }
 </style>
 </head>
-
 <body>
 
-<!-- ==================================================
-     PHONE REGISTRATION
-================================================== -->
-
+<!-- AUTH -->
 <div class="auth-screen" id="authScreen">
+<div class="auth-box">
+<div class="logo">LinkUp</div>
+<div class="subtitle">Connect with people everywhere</div>
 
-    <div class="auth-box">
-
-        <div class="logo">
-            LinkUp
-        </div>
-
-        <div class="subtitle">
-            Connect with people everywhere
-        </div>
-
-        <!-- PHONE STEP -->
-
-        <div id="phoneStep">
-
-            <div class="auth-title">
-                Verify your phone number
-            </div>
-
-            <div class="error" id="phoneError"></div>
-
-            <div class="country-row">
-
-                <input
-                    class="input country"
-                    id="countryCode"
-                    value="+234"
-                    placeholder="+234"
-                >
-
-                <input
-                    class="input phone"
-                    id="phoneNumber"
-                    type="tel"
-                    placeholder="8012345678"
-                >
-
-            </div>
-
-            <button
-                class="button"
-                onclick="sendVerificationCode()"
-            >
-                Send verification code
-            </button>
-
-            <div
-                class="small-text"
-            >
-                You will receive an SMS with a verification code.
-            </div>
-
-        </div>
-
-
-        <!-- CODE STEP -->
-
-        <div
-            id="codeStep"
-            class="hidden"
-        >
-
-            <div class="auth-title">
-                Enter verification code
-            </div>
-
-            <div class="error" id="codeError"></div>
-
-            <input
-                class="input"
-                id="verificationCode"
-                type="text"
-                inputmode="numeric"
-                maxlength="6"
-                placeholder="6-digit code"
-            >
-
-            <button
-                class="button"
-                onclick="verifyCode()"
-            >
-                Verify number
-            </button>
-
-            <div
-                class="small-text"
-                onclick="backToPhone()"
-                style="cursor:pointer;color:#25d366"
-            >
-                Change phone number
-            </div>
-
-        </div>
-
-
-        <!-- PROFILE STEP -->
-
-        <div
-            id="profileStep"
-            class="hidden"
-        >
-
-            <div class="auth-title">
-                Create your profile
-            </div>
-
-            <div class="error" id="profileError"></div>
-
-            <input
-                class="input"
-                id="displayName"
-                type="text"
-                placeholder="Your name"
-                maxlength="40"
-            >
-
-            <button
-                class="button"
-                onclick="finishProfile()"
-            >
-                Continue
-            </button>
-
-        </div>
-
-        <!-- CAPTCHA -->
-
-        <div id="recaptcha-container"></div>
-
-    </div>
-
+<div id="phoneStep">
+<div class="auth-title">Verify your phone number</div>
+<div class="error" id="phoneError"></div>
+<div class="country-row">
+<input class="input country" id="countryCode" value="+234" placeholder="+234">
+<input class="input phone" id="phoneNumber" type="tel" placeholder="8012345678">
+</div>
+<button class="button" onclick="sendVerificationCode()">Send verification code</button>
+<div class="small-text">You will receive an SMS with a verification code.</div>
 </div>
 
-
-<!-- ==================================================
-     MAIN APP
-================================================== -->
-
-<div
-    class="app hidden"
-    id="app"
->
-
-    <div class="sidebar">
-
-        <div class="topbar">
-
-            <div class="logo-small">
-                LinkUp
-            </div>
-
-            <div class="top-actions">
-
-                <span
-                    class="action"
-                    onclick="newChat()"
-                >
-                    ✚
-                </span>
-
-                <span
-                    class="action"
-                    onclick="logout()"
-                >
-                    ⎋
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="profile">
-
-            <div
-                class="profile-name"
-                id="myName"
-            >
-                User
-            </div>
-
-            <div
-                class="profile-number"
-                id="myNumber"
-            >
-                +234
-            </div>
-
-        </div>
-
-
-        <div class="search">
-
-            <div class="search-box">
-
-                🔍
-
-                <input
-                    id="searchInput"
-                    placeholder="Search chats"
-                    oninput="searchChats()"
-                >
-
-            </div>
-
-        </div>
-
-
-        <div
-            class="chat-list"
-            id="chatList"
-        ></div>
-
-    </div>
-
-
-    <div
-        class="chat-area"
-        id="chatArea"
-    >
-
-        <div class="empty">
-
-            <div>
-
-                <h1>LinkUp</h1>
-
-                <p>
-                    Select a chat or start a new conversation.
-                </p>
-
-            </div>
-
-        </div>
-
-    </div>
-
+<div id="codeStep" class="hidden">
+<div class="auth-title">Enter verification code</div>
+<div class="error" id="codeError"></div>
+<input class="input" id="verificationCode" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit code">
+<button class="button" onclick="verifyCode()">Verify number</button>
+<div class="small-text" onclick="backToPhone()" style="cursor:pointer;color:#25d366">Change phone number</div>
 </div>
 
-
-<!-- ==================================================
-     NEW CHAT
-================================================== -->
-
-<div
-    class="modal"
-    id="newChatModal"
->
-
-    <div class="modal-box">
-
-        <h2>
-            Start new chat
-        </h2>
-
-        <input
-            id="recipientPhone"
-            type="tel"
-            placeholder="+2348012345678"
-        >
-
-        <div
-            style="
-            color:#8696a0;
-            font-size:12px;
-            line-height:18px;
-            margin-bottom:15px;
-            "
-        >
-            Enter the person's verified LinkUp phone number.
-            They don't need to add you first.
-        </div>
-
-        <div class="modal-buttons">
-
-            <button
-                class="cancel"
-                onclick="closeNewChat()"
-            >
-                Cancel
-            </button>
-
-            <button
-                class="confirm"
-                onclick="findUserByPhone()"
-            >
-                Start chat
-            </button>
-
-        </div>
-
-    </div>
-
+<div id="profileStep" class="hidden">
+<div class="auth-title">Create your profile</div>
+<div class="error" id="profileError"></div>
+<input class="input" id="displayName" type="text" placeholder="Your name" maxlength="40">
+<button class="button" onclick="finishProfile()">Continue</button>
 </div>
 
+<div id="recaptcha-container"></div>
+</div>
+</div>
+
+<!-- APP -->
+<div class="app hidden" id="app">
+<div class="sidebar">
+<div class="topbar">
+<div class="logo-small">LinkUp</div>
+<div class="top-actions">
+<span class="action" onclick="newChat()">✚</span>
+<span class="action" onclick="logout()">⎋</span>
+</div>
+</div>
+<div class="profile">
+<div class="profile-name" id="myName">User</div>
+<div class="profile-number" id="myNumber">+234</div>
+</div>
+<div class="search">
+<div class="search-box">🔍<input id="searchInput" placeholder="Search chats" oninput="searchChats()"></div>
+</div>
+<div class="chat-list" id="chatList"></div>
+</div>
+
+<div class="chat-area" id="chatArea">
+<div class="empty"><div><h1>LinkUp</h1><p>Select a chat or start a new conversation.</p></div></div>
+</div>
+</div>
+
+<!-- NEW CHAT -->
+<div class="modal" id="newChatModal">
+<div class="modal-box">
+<h2>Start new chat</h2>
+<input id="recipientPhone" type="tel" placeholder="+2348012345678">
+<div style="color:#8696a0;font-size:12px;line-height:18px;margin-bottom:15px">
+Enter the person's verified LinkUp phone number. They don't need to add you first.
+</div>
+<div class="modal-buttons">
+<button class="cancel" onclick="closeNewChat()">Cancel</button>
+<button class="confirm" onclick="findUserByPhone()">Start chat</button>
+</div>
+</div>
+</div>
 
 <script>
-
-/* ==================================================
-   FIREBASE CONFIG
-
-   REPLACE WITH YOUR OWN FIREBASE PROJECT VALUES
-================================================== */
-
+/* CONFIG */
 const firebaseConfig = {
-
-    apiKey: "YOUR_API_KEY",
-
-    authDomain:
-        "YOUR_PROJECT.firebaseapp.com",
-
-    databaseURL:
-        "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-
-    projectId:
-        "YOUR_PROJECT_ID",
-
-    storageBucket:
-        "YOUR_PROJECT.firebasestorage.app",
-
-    messagingSenderId:
-        "YOUR_MESSAGING_SENDER_ID",
-
-    appId:
-        "YOUR_APP_ID"
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_PROJECT.firebaseapp.com",
+databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+projectId: "YOUR_PROJECT_ID",
+storageBucket: "YOUR_PROJECT.firebasestorage.app",
+messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+appId: "YOUR_APP_ID"
 };
 
-
-/* ==================================================
-   INITIALIZE
-================================================== */
-
 firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
-const auth =
-    firebase.auth();
-
-const db =
-    firebase.database();
-
-
-/* ==================================================
-   VARIABLES
-================================================== */
-
+/* VARS */
 let currentUser = null;
-
 let currentProfile = null;
-
 let currentChatUser = null;
-
 let currentChatId = null;
-
 let confirmationResult = null;
-
 let recaptchaVerifier = null;
-
 let messagesListener = null;
 
-
-/* ==================================================
-   PHONE HELPERS
-================================================== */
-
+/* HELPERS */
 function normalizePhone(){
-
-    let country =
-        document
-        .getElementById("countryCode")
-        .value
-        .trim();
-
-    let phone =
-        document
-        .getElementById("phoneNumber")
-        .value
-        .trim();
-
-    country =
-        country.replace(/[^\d+]/g,"");
-
-    phone =
-        phone.replace(/\D/g,"");
-
-    if(country === ""){
-        country = "+234";
-    }
-
-    if(!country.startsWith("+")){
-        country = "+" + country;
-    }
-
-    return country + phone;
+let country = document.getElementById("countryCode").value.trim().replace(/[^\d+]/g,"");
+let phone = document.getElementById("phoneNumber").value.trim().replace(/\D/g,"");
+if(country === "") country = "+234";
+if(!country.startsWith("+")) country = "+" + country;
+return country + phone;
 }
+function cleanPhone(phone){ return phone.replace(/[^0-9]/g, ""); }
 
-
-function cleanPhone(phone){
-
-    return phone.replace(
-        /[^0-9]/g,
-        ""
-    );
-}
-
-
-/* ==================================================
-   RECAPTCHA
-================================================== */
-
+/* RECAPTCHA */
 function setupRecaptcha(){
-
-    if(recaptchaVerifier){
-        return;
-    }
-
-    recaptchaVerifier =
-        new firebase.auth.RecaptchaVerifier(
-            "recaptcha-container",
-            {
-                size:"invisible",
-
-                callback:function(){
-                    console.log(
-                        "reCAPTCHA verified"
-                    );
-                }
-            }
-        );
-
-    recaptchaVerifier.render();
+if(recaptchaVerifier) return;
+recaptchaVerifier = new firebase.auth.RecaptchaVerifier("recaptcha-container", {
+size:"invisible",
+callback:function(){ console.log("reCAPTCHA verified"); }
+});
+recaptchaVerifier.render();
 }
 
-
-/* ==================================================
-   SEND SMS
-================================================== */
-
+/* SEND SMS */
 async function sendVerificationCode(){
-
-    clearErrors();
-
-    const phone =
-        normalizePhone();
-
-    if(phone.length < 10){
-
-        document
-        .getElementById("phoneError")
-        .innerText =
-            "Enter a valid phone number.";
-
-        return;
-    }
-
-    try{
-
-        setupRecaptcha();
-
-        confirmationResult =
-            await auth.signInWithPhoneNumber(
-                phone,
-                recaptchaVerifier
-            );
-
-        document
-        .getElementById("phoneStep")
-        .classList.add("hidden");
-
-        document
-        .getElementById("codeStep")
-        .classList.remove("hidden");
-
-    }catch(error){
-
-        console.error(error);
-
-        document
-        .getElementById("phoneError")
-        .innerText =
-            firebaseError(error.code);
-    }
+clearErrors();
+const phone = normalizePhone();
+if(phone.length < 10){
+document.getElementById("phoneError").innerText = "Enter a valid phone number.";
+return;
+}
+try{
+setupRecaptcha();
+confirmationResult = await auth.signInWithPhoneNumber(phone, recaptchaVerifier);
+document.getElementById("phoneStep").classList.add("hidden");
+document.getElementById("codeStep").classList.remove("hidden");
+}catch(error){
+console.error(error);
+document.getElementById("phoneError").innerText = firebaseError(error.code);
+}
 }
 
-
-/* ==================================================
-   VERIFY CODE
-================================================== */
-
+/* VERIFY CODE */
 async function verifyCode(){
-
-    clearErrors();
-
-    const code =
-        document
-        .getElementById("verificationCode")
-        .value
-        .trim();
-
-    if(code.length !== 6){
-
-        document
-        .getElementById("codeError")
-        .innerText =
-            "Enter the 6-digit code.";
-
-        return;
-    }
-
-    try{
-
-        const result =
-            await confirmationResult
-            .confirm(code);
-
-        currentUser =
-            result.user;
-
-        const existing =
-            await db
-            .ref(
-                "users/" +
-                currentUser.uid
-            )
-            .once("value");
-
-        if(existing.exists()){
-
-            currentProfile =
-                existing.val();
-
-            startApplication();
-
-        }else{
-
-            document
-            .getElementById("codeStep")
-            .classList.add("hidden");
-
-            document
-            .getElementById("profileStep")
-            .classList.remove("hidden");
-        }
-
-    }catch(error){
-
-        console.error(error);
-
-        document
-        .getElementById("codeError")
-        .innerText =
-            "Invalid or expired verification code.";
-    }
+clearErrors();
+const code = document.getElementById("verificationCode").value.trim();
+if(code.length !== 6){
+document.getElementById("codeError").innerText = "Enter the 6-digit code.";
+return;
+}
+try{
+const result = await confirmationResult.confirm(code);
+currentUser = result.user;
+const existing = await db.ref("users/" + currentUser.uid).once("value");
+if(existing.exists()){
+currentProfile = existing.val();
+startApplication();
+}else{
+document.getElementById("codeStep").classList.add("hidden");
+document.getElementById("profileStep").classList.remove("hidden");
+}
+}catch(error){
+console.error(error);
+document.getElementById("codeError").innerText = "Invalid or expired verification code.";
+}
 }
 
-
-/* ==================================================
-   CREATE PROFILE
-================================================== */
-
+/* PROFILE */
 async function finishProfile(){
-
-    clearErrors();
-
-    const name =
-        document
-        .getElementById("displayName")
-        .value
-        .trim();
-
-    if(name.length < 2){
-
-        document
-        .getElementById("profileError")
-        .innerText =
-            "Enter your name.";
-
-        return;
-    }
-
-    try{
-
-        /*
-         * Store the user's phone number.
-         * The UID is Firebase's secure account identifier.
-         */
-
-        const profile = {
-
-            uid:
-                currentUser.uid,
-
-            name:
-                name,
-
-            phone:
-                currentUser.phoneNumber,
-
-            phoneSearch:
-                cleanPhone(
-                    currentUser.phoneNumber
-                ),
-
-            createdAt:
-                firebase.database.ServerValue.TIMESTAMP,
-
-            online:true
-        };
-
-
-        await db
-            .ref(
-                "users/" +
-                currentUser.uid
-            )
-            .set(profile);
-
-
-        /*
-         * Phone lookup index.
-         * This allows another LinkUp user to find
-         * this account using the phone number.
-         */
-
-        await db
-            .ref(
-                "phoneIndex/" +
-                cleanPhone(
-                    currentUser.phoneNumber
-                )
-            )
-            .set(
-                currentUser.uid
-            );
-
-
-        currentProfile =
-            profile;
-
-        startApplication();
-
-    }catch(error){
-
-        console.error(error);
-
-        document
-        .getElementById("profileError")
-        .innerText =
-            "Could not create your profile.";
-    }
+clearErrors();
+const name = document.getElementById("displayName").value.trim();
+if(name.length < 2){
+document.getElementById("profileError").innerText = "Enter your name.";
+return;
+}
+try{
+const profile = {
+uid: currentUser.uid,
+name: name,
+phone: currentUser.phoneNumber,
+phoneSearch: cleanPhone(currentUser.phoneNumber),
+createdAt: firebase.database.ServerValue.TIMESTAMP,
+online:true
+};
+await db.ref("users/" + currentUser.uid).set(profile);
+await db.ref("phoneIndex/" + cleanPhone(currentUser.phoneNumber)).set(currentUser.uid);
+currentProfile = profile;
+startApplication();
+}catch(error){
+console.error(error);
+document.getElementById("profileError").innerText = "Could not create your profile.";
+}
 }
 
-
-/* ==================================================
-   AUTH STATE
-================================================== */
-
+/* AUTH STATE */
 auth.onAuthStateChanged(async user=>{
-
-    if(!user){
-        return;
-    }
-
-    currentUser = user;
-
-    const snapshot =
-        await db
-        .ref(
-            "users/" +
-            user.uid
-        )
-        .once("value");
-
-    if(snapshot.exists()){
-
-        currentProfile =
-            snapshot.val();
-
-        startApplication();
-
-    }else{
-
-        /*
-         * Don't automatically show the app
-         * until the profile is completed.
-         */
-    }
+if(!user) return;
+currentUser = user;
+const snapshot = await db.ref("users/" + user.uid).once("value");
+if(snapshot.exists()){
+currentProfile = snapshot.val();
+startApplication();
+}
 });
 
-
-/* ==================================================
-   START APP
-================================================== */
-
+/* START APP */
 function startApplication(){
+document.getElementById("authScreen").classList.add("hidden");
+document.getElementById("app").classList.remove("hidden");
+document.getElementById("myName").innerText = currentProfile.name;
+document.getElementById("myNumber").innerText = currentProfile.phone;
+setOnlineStatus();
+loadChats();
+}
 
-    document
-    .getElement
+/* ONLINE */
+function setOnlineStatus(){
+const statusRef = db.ref("users/" + currentUser.uid + "/online");
+const connectedRef = db.ref(".info/connected");
+connectedRef.on("value", snapshot => {
+if(snapshot.val() === true){
+statusRef.onDisconnect().set(false);
+statusRef.set(true);
+}
+});
+}
+
+/* LOGOUT */
+async function logout(){
+if(currentUser){ await db.ref("users/" + currentUser.uid + "/online").set(false); }
+await auth.signOut();
+location.reload();
+}
+
+/* CHAT ID */
+function getChatId(uid1, uid2){ return [uid1, uid2].sort().join("_"); }
+
+/* NEW CHAT */
+function newChat(){
+document.getElementById("newChatModal").style.display = "flex";
+document.getElementById("recipientPhone").focus();
+}
+function closeNewChat(){
+document.getElementById("newChatModal").style.display = "none";
+document.getElementById("recipientPhone").value = "";
+}
+
+/* FIND BY PHONE */
+async function findUserByPhone(){
+const phone = document.getElementById("recipientPhone").value.trim();
+const clean = cleanPhone(phone);
+if(!phone){ alert("Enter a phone number."); return; }
+if(clean === cleanPhone(currentUser.phoneNumber)){ alert("You cannot chat with yourself."); return; }
+try{
+const snapshot = await db.ref("phoneIndex/" + clean).once("value");
+if(!snapshot.exists()){ alert("No LinkUp account found with that number."); return; }
+const uid = snapshot.val();
+const userSnap = await db.ref("users/" + uid).once("value");
+const recipient = userSnap.val();
+closeNewChat();
+openChat(recipient);
+}catch(error){ console.error(error); alert("Could not find user."); }
+}
+
+/* OPEN CHAT */
+async function openChat(recipient){
+if(messagesListener) messagesListener.off();
+currentChatUser = recipient;
+currentChatId = getChatId(currentUser.uid, recipient.uid);
+document.getElementById("app").classList.add("chat-open");
+document.getElementById("chatArea").innerHTML = `
+<div class="chat-header">
+<span class="back" onclick="goBack()">←</span>
+<div class="header-avatar">${recipient.name[0].toUpperCase()}</div>
+<div class="header-info">
+<div class="header-name">${recipient.name}</div>
+<div class="status" id="recipientStatus">offline</div>
+</div>
+<div class="header-actions">⋮</div>
+</div>
+<div class="messages" id="messagesContainer"><div class="date"><span>Today</span></div></div>
+<div class="input-area">
+<span class="input-icon">😊</span>
+<input type="text" class="message-input" id="messageInput" placeholder="Type a message" onkeypress="if(event.key==='Enter') sendMessage()">
+<button class="send" onclick="sendMessage()">➤</button>
+</div>`;
+loadMessages();
+loadRecipientStatus();
+addToChatList(recipient);
+}
+function goBack(){ document.getElementById("app").classList.remove("chat-open"); }
+
+/* SEND */
+async function sendMessage(){
+const input = document.getElementById("messageInput");
+const text = input.value.trim();
+if(!text || !currentChatId) return;
+const message = { text: text, sender: currentUser.uid, timestamp: firebase.database.ServerValue.TIMESTAMP };
+await db.ref("chats/" + currentChatId + "/messages").push(message);
+const chatData = { lastMessage: text, lastTime: firebase.database.ServerValue.TIMESTAMP, users: {[currentUser.uid]: true, [currentChatUser.uid]: true} };
+await db.ref("userChats/" + currentUser.uid + "/" + currentChatId).update(chatData);
+await db.ref("userChats/" + currentChatUser.uid + "/" + currentChatId).update(chatData);
+input.value = "";
+}
+
+/* LOAD MESSAGES */
+function loadMessages(){
+const container = document.getElementById("messagesContainer");
+messagesListener = db.ref("chats/" + currentChatId + "/messages").limitToLast(100);
+messagesListener.on("child_added", snapshot => {
+const msg = snapshot.val();
+const isSent = msg.sender === currentUser.uid;
+const msgDiv = document.createElement("div");
+msgDiv.className = "message " + (isSent ? "sent" : "received");
+const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
+msgDiv.innerHTML = `${msg.text}<span class="message-time">${time} ${isSent ? '<span class="check">✓✓</span>' : ''}</span>`;
+container.appendChild(msgDiv);
+container.scrollTop = container.scrollHeight;
+});
+}
+
+/* LOAD CHATS */
+function loadChats(){
+const chatList = document.getElementById("chatList");
+db.ref("userChats/" + currentUser.uid).on("value", snapshot => {
+chatList.innerHTML = "";
+if(!snapshot.exists()) return;
+snapshot.forEach(child => {
+const chatId = child.key;
+const data = child.val();
+const otherUid = Object.keys(data.users).find(uid => uid !== currentUser.uid);
+db.ref("users/" + otherUid).once("value").then(userSnap => {
+const user = userSnap.val();
+if(!user) return;
+const chatDiv = document.createElement("div");
+chatDiv.className = "chat";
+chatDiv.onclick = () => openChat(user);
+const time = data.lastTime ? new Date(data.lastTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
+chatDiv.innerHTML = `<div class="avatar">${user.name[0].toUpperCase()}</div><div class="chat-info"><div class="chat-name"><span>${user.name}</span><span class="chat-time">${time}</span></div><div class="chat-preview">${data.lastMessage || ""}</div></div>`;
+chatList.appendChild(chatDiv);
+});
+});
+});
+}
+
+/* ADD TO LIST */
+async function addToChatList(recipient){
+const chatData = { users: {[currentUser.uid]: true, [recipient.uid]: true}, lastMessage: "", lastTime: firebase.database.ServerValue.TIMESTAMP };
+await db.ref("userChats/" + currentUser.uid + "/" + currentChatId).update(chatData);
+await db.ref("userChats/" + recipient.uid + "/" + currentChatId).update(chatData);
+}
+
+/* STATUS */
+function loadRecipientStatus(){
+db.ref("users/" + currentChatUser.uid + "/online").on("value", snapshot => {
+const status = snapshot.val() ? "online" : "last seen";
+const el = document.getElementById("recipientStatus");
+if(el) el.innerText = status;
+});
+}
+
+/* SEARCH */
+function searchChats(){
+const query = document.getElementById("searchInput").value.toLowerCase();
+const chats = document.querySelectorAll(".chat");
+chats.forEach(chat => {
+const name = chat.querySelector(".chat-name span").innerText.toLowerCase();
+chat.style.display = name.includes(query) ? "flex" : "none";
+});
+}
+
+/* ERRORS */
+function clearErrors(){
+document.getElementById("phoneError").innerText = "";
+document.getElementById("codeError").innerText = "";
+document.getElementById("profileError").innerText = "";
+}
+function backToPhone(){
+document.getElementById("codeStep").classList.add("hidden");
+document.getElementById("phoneStep").classList.remove("hidden");
+}
+function firebaseError(code){
+switch(code){
+case "auth/invalid-phone-number": return "Invalid phone number.";
+case "auth/too-many-requests": return "Too many attempts. Try again later.";
+default: return "Something went wrong. Try again.";
+}
+}
+</script>
+</body>
+</html>
