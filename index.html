@@ -175,15 +175,15 @@ Enter the person's verified LinkUp phone number. They don't need to add you firs
 </div>
 
 <script>
-/* CONFIG */
+/* YOUR FIREBASE CONFIG */
 const firebaseConfig = {
-apiKey: "YOUR_API_KEY",
-authDomain: "YOUR_PROJECT.firebaseapp.com",
-databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-projectId: "YOUR_PROJECT_ID",
-storageBucket: "YOUR_PROJECT.firebasestorage.app",
-messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
+  authDomain: "linkup-chat-3fdd5.firebaseapp.com",
+  databaseURL: "https://linkup-chat-3fdd5-default-rtdb.firebaseio.com",
+  projectId: "linkup-chat-3fdd5",
+  storageBucket: "linkup-chat-3fdd5.firebasestorage.app",
+  messagingSenderId: "177573067619",
+  appId: "1:177573067619:web:40e64ae330bb86200e7156"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -437,8 +437,6 @@ const time = data.lastTime ? new Date(data.lastTime).toLocaleTimeString([], {hou
 chatDiv.innerHTML = `<div class="avatar">${user.name[0].toUpperCase()}</div><div class="chat-info"><div class="chat-name"><span>${user.name}</span><span class="chat-time">${time}</span></div><div class="chat-preview">${data.lastMessage || ""}</div></div>`;
 chatList.appendChild(chatDiv);
 });
-});
-});
 }
 
 /* ADD TO LIST */
@@ -482,7 +480,6 @@ switch(code){
 case "auth/invalid-phone-number": return "Invalid phone number.";
 case "auth/too-many-requests": return "Too many attempts. Try again later.";
 default: return "Something went wrong. Try again.";
-}
 }
 </script>
 </body>
